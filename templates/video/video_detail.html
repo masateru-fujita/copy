@@ -1,0 +1,298 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/video.css' %}">
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'main:top' %}">TOP</a>
+    <p class="separation">></p>
+    <a href="{% url 'project:project_list' %}">プロジェクト一覧</a>
+    <p class="separation">></p>
+    <a href="{% url 'video:video_list' project.pk %}">{{ project.title }}</a>
+    <p class="separation">></p>
+    <p>{{ relation.title }}</p>
+</div>
+<div class="flex-wrap">
+    <div class="video-content">
+        <div class="video-wrap">
+            <div id="video-field">
+                {% for video in videos %}
+                    <video class="video" muted>
+                        <source src="/{{ video.video }}">
+                    </video>
+                    {% if forloop.first %}
+                        <div class="video-flex-box">
+                    {% endif %}
+                    {% if forloop.last %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div id="popup-field-wrap" class="popup-field-wrap">
+                    <div class="popup-content">
+                        <img src="/static/images/video/noimage.png" class="popup-img-field">
+                        <p class="popup-text-field"></p>
+                    </div>
+                    <button id="popup-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
+                </div>
+                <div id="story-tag-area">
+                    <p>ストーリータグ</p>
+                    <p>次の動画：<span class="next-video-title"></span></p>
+                    <p>開始フレーム：<span class="next-video-start-flame"></span></p>
+                    <button id="story-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
+                </div>
+                <div id="endtag-field-wrap">
+                    <p class="endtag-title"></p>
+                    <p class="endtag-content"></p>
+                    <button id="endtag-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
+                </div>
+            </div>
+        </div>
+        {% comment %} 再生ボタンやシークバー部分 {% endcomment %}
+        <div class="video-footer">
+            <div id="video-control" width:"50px">
+                <img src="{% get_static_prefix %}images/video/play_btn.png" width="50px" id="video-btn" class="video-btn">
+            </div>
+            <div id="seekbar">
+                <div id="seekbar-total"></div>
+                <div id="seekbar-now"></div>
+            </div>
+            <div id="video-time">
+                <div id="time-current">00:00</div>
+                <div>/</div>
+                <div id="time-duration"></div>
+            </div>
+            <div id="frame">
+                <div id="frame-now">0</div>
+                <div>/</div>
+                <div id="frame-total"></div>
+            </div>
+        </div>
+    </div>
+    <div class="tag-form">
+        {% for link_tag in link_tags %}
+        <div class="tag-per-wrap">
+            <p id="tag-per-btn-{{ link_tag.pk }}" class="tag-per-btn">{{ link_tag.title }}</p>
+            <form action="" method="post" id="tag-per-form-{{ link_tag.pk }}" class="tag-per-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="link_tag_id" value="{{ link_tag.id }}">
+                <div>
+                    <div class="form-group">
+                        {{ form.width.errors }}
+                        <button type="button" id="add-tag-area-btn-{{ link_tag.id }}" class="add-tag-area-btn">領域指定</button>
+                    </div>
+                    <div class="form-group action-type-col">
+                        <label for="formGroupExampleInput">タグアクション</label>
+                        <div>
+                            <input type="radio" name="action_type" value="link" id="radio-link-{{ link_tag.id }}">
+                            <label for="radio-link-{{ link_tag.id }}">外部リンク</label>
+                            <input type="radio" name="action_type" value="popup" id="radio-popup-{{ link_tag.id }}">
+                            <label for="radio-popup-{{ link_tag.id }}">ポップアップ</label>
+                            <input type="radio" name="action_type" value="story" id="radio-story-{{ link_tag.id }}">
+                            <label for="radio-story-{{ link_tag.id }}">ストーリー</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="formGroupExampleInput">タイトル</label>
+                        {{ form.title.errors }}
+                        <input type="text" name="title" class="form-control" value="{{ link_tag.title }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="formGroupExampleInput">開始フレーム</label>
+                        {{ form.display_frame.errors }}
+                        <input type="number" name="display_frame" class="form-control" value="{{ link_tag.display_frame }}">
+                        <label for="formGroupExampleInput">終了フレーム</label>
+                        {{ form.hide_frame.errors }}
+                        <input type="number" name="hide_frame" class="form-control" value="{{ link_tag.hide_frame }}">
+                    </div>
+                    <div class="link-tag-col">
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">URL</label>
+                            {{ form.link_url.errors }}
+                            <input type="text" name="link_url" class="form-control" value="{{ link_tag.link_url }}">
+                        </div>
+                    </div>
+                    <div class="popup-tag-col">
+                        <div class="form-group popup-type-col">
+                            <label>テンプレート選択</label>
+                            <div>
+                                <input type="radio" class="popup-type-{{ link_tag.id }}" name="popup_type" value="default" id="radio-default-{{ link_tag.id }}">
+                                <label for="radio-default-{{ link_tag.id }}">通常</label>
+                                <input type="radio" class="popup-type-{{ link_tag.id }}" name="popup_type" value="vertical" id="radio-vertical-{{ link_tag.id }}">
+                                <label for="radio-vertical-{{ link_tag.id }}">縦</label>
+                                <input type="radio" class="popup-type-{{ link_tag.id }}" name="popup_type" value="text" id="radio-text-{{ link_tag.id }}">
+                                <label for="radio-text-{{ link_tag.id }}">テキストのみ</label>
+                            </div>
+                        </div>
+                        <div class="form-group popup-file-col">
+                            <!-- 画像 -->
+                            <label for="popup-img-{{ link_tag.id }}" class="popup-img-label formGroupExampleInput">
+                                <input type="file" id="popup-img-{{ link_tag.id }}" name="popup_img" class="popup-img" accept='image/*'>
+                                <p>ファイルを選択</p>
+                            </label>
+                            <p class="file-name">選択されていません</p>
+                            <!-- テキスト -->
+                            <label>表示文字</label>
+                            <input type="text" id="popup-text-{{ link_tag.id }}" name="popup_text" class="popup-text form-control">
+                            <input type="hidden" name="video-width">
+                            <input type="hidden" name="video-height">
+                            <button type="button" id="popup-preview-btn-{{ link_tag.id }}" class="popup-preview-btn">プレビュー</button>
+                        </div>
+                    </div>
+                    <div class="story-tag-col">
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">ストーリー先動画</label>
+                            {{ form.story_next_video.errors }}
+                            <select name="story_next_video" disabled>
+                                {% for next_video in next_videos %}
+                                    <option value="{{ next_video.pk }}">{{ next_video.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">ストーリー開始フレーム</label>
+                            {{ form.story_start_flame.errors }}
+                            <input type="number" name="story_start_flame" class="form-control" disabled value="{{ link_tag.story_start_flame }}">
+                        </div>
+                    </div>
+                    <input type="hidden" name="video" value="{{ videos.0.id }}">
+                    <input type="submit" name="update-tag-btn" value="更新">
+                    <a href="{% url 'video:delete_tag' relation.pk link_tag.id %}">削除</a>
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+        <div class="general-tag-wrap">
+            <div class="general-tag-btn">タグ設定</div>
+            <div class="general-tag-form">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div id="input_wrap">
+                        <div class="form-group">
+                            {{ form.width.errors }}
+                            <button type="button" id="add-tag-area-btn" class="add-tag-area-btn">領域指定</button>
+                        </div>
+                        <div class="form-group action-type-col">
+                            <label for="formGroupExampleInput">タグアクション</label>
+                            <div>
+                                <input type="radio" name="action_type" value="link" id="radio-link-general">
+                                <label for="radio-link-general">外部リンク</label>
+                                <input type="radio" name="action_type" value="popup" id="radio-popup-general">
+                                <label for="radio-popup-general">ポップアップ</label>
+                                <input type="radio" name="action_type" value="story" id="radio-story-general">
+                                <label for="radio-story-general">ストーリー</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">タイトル</label>
+                            {{ form.title.errors }}
+                            <input type="text" id="link-tag-title" name="title" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">開始フレーム</label>
+                            {{ form.display_frame.errors }}
+                            <input type="number" name="display_frame" class="form-control">
+                            <label for="formGroupExampleInput">終了フレーム</label>
+                            {{ form.hide_frame.errors }}
+                            <input type="number" name="hide_frame" class="form-control">
+                        </div>
+                        <div class="link-tag-col">
+                            <div class="form-group">
+                                <label for="formGroupExampleInput">URL</label>
+                                {{ form.link_url.errors }}
+                                <input type="text" name="link_url" class="form-control">
+                            </div>
+                        </div>
+                        <div class="popup-tag-col">
+                            <div class="form-group popup-type-col">
+                                <label>テンプレート選択</label>
+                                <div>
+                                    <input type="radio" class="popup-type-general" name="popup_type" value="default" id="radio-default-general" checked>
+                                    <label for="radio-default-general">通常</label>
+                                    <input type="radio" class="popup-type-general" name="popup_type" value="vertical" id="radio-vertical-general">
+                                    <label for="radio-vertical-general">縦</label>
+                                    <input type="radio" class="popup-type-general" name="popup_type" value="text" id="radio-text-general">
+                                    <label for="radio-text-general">テキストのみ</label>
+                                </div>
+                            </div>
+                            <div class="form-group popup-file-col">
+                                <!-- 画像 -->
+                                <label for="popup-img-general" class="popup-img-label formGroupExampleInput">
+                                    <input type="file" id="popup-img-general" name="popup_img" class="popup-img" accept='image/*'>
+                                    <p>ファイルを選択</p>
+                                </label>
+                                <p class="file-name">選択されていません</p>
+                                <!-- テキスト -->
+                                <label class="formGroupExampleInput">表示文字</label>
+                                <input type="text" id="popup-text-general" name="popup_text" class="popup-text form-control">
+                                <input type="hidden" name="video-width">
+                                <input type="hidden" name="video-height">
+                                <button type="button" id="popup-preview-btn-general" class="popup-preview-btn">プレビュー</button>
+                            </div>
+                        </div>
+                        <div class="story-tag-col">
+                            <div class="form-group">
+                                <label for="formGroupExampleInput">ストーリー先動画</label>
+                                {{ form.story_next_video.errors }}
+                                <select name="story_next_video" disabled>
+                                    {% for next_video in next_videos %}
+                                        <option value="{{ next_video.pk }}">{{ next_video.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="formGroupExampleInput">ストーリー開始フレーム</label>
+                                {{ form.story_start_flame.errors }}
+                                <input type="number" name="story_start_flame" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <input type="hidden" name="video" value="{{ videos.0.id }}">
+                        <div class="btn-area">
+                            <input type="submit" class="add-btn" name="link-tag-button" value="追加">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="end-tag-wrap">
+            <div class="end-tag-btn">終了画面タグ</div>
+            <div class="end-tag-form">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div id="input_wrap">
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">タイトル</label>
+                            {{ form.title.errors }}
+                            <input type="text" name="title" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="formGroupExampleInput">内容</label>
+                            {{ form.content.errors }}
+                            <textarea name="content" rows="4" cols="40" class="form-control"></textarea>
+                        </div>
+                        <input type="hidden" name="video" value="{{ videos.0.id }}">
+                        <div class="btn-area">
+                            <input type="submit" class="add-btn" name="end-tag-button" value="追加 / 変更">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div>
+            <p>埋め込みタグ</p>
+            <textarea><iframe width="560" height="315" src="http://127.0.0.1:8000/{{ relation.pk }}" frameborder="0" allow="autoplay;" allowfullscreen></iframe></textarea>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+    <script type="text/javascript">
+        var link_tags = "{{ link_tags_json|escapejs }}";
+        var end_tags = "{{ end_tags_json|escapejs }}";
+        var url_for_story = "{% url 'video:next_video' %}";
+    </script>
+    <script type="text/javascript" src="{% static 'js/video.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/tag.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/popup.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/video_footer.js' %}"></script>
+{% endblock %}

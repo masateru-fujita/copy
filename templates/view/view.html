@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load static %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/destyle.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/view.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <title>動画</title>
+</head>
+<body>
+    <div class="video-wrap">
+        <div class="videos">
+            {% for video in videos %}
+                {% if forloop.first %}
+                <div class="main-video-box">
+                    <video id="main-video" class="video">
+                        <source src="/{{ video.video }}">
+                    </video>
+                </div>
+                    <div class="video-flex-box">
+                {% endif %}
+                {% if not forloop.first %}
+                <video class="video" muted>
+                    <source src="/{{ video.video }}">
+                </video>
+                {% endif %}
+                {% if forloop.last %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div class="popup-field">
+                <img src="/static/images/video/noimage.png" class="popup-img-field">
+                <p class="popup-text-field"></p>
+                <button id="popup-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
+            </div>
+            <div class="endtag-field">
+                <p class="endtag-title"></p>
+                <p class="endtag-content"></p>
+                <button id="endtag-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
+            </div>
+        </div>
+        {% comment %} 再生ボタンやシークバー部分 {% endcomment %}
+        <div class="video-footer">
+            <img src="{% get_static_prefix %}images/video/play_btn.png" id="video-btn" class="video-btn">
+            <div class="seekbar">
+                <div id="seekbar-total"></div>
+                <div id="seekbar-now"></div>
+            </div>
+            <div class="video-time">
+                <div id="time-current">00:00</div>
+                <div>/</div>
+                <div id="time-duration"></div>
+            </div>
+            <div class="video-frame">
+                <div id="frame-now">0</div>
+                <div>/</div>
+                <div id="frame-total"></div>
+            </div>
+        </div>
+    </div>
+<script type="text/javascript">
+    var next_video_url = "{% url 'view:get_next_video' %}";
+    var json_tags = "{{ link_tags_json|escapejs }}";
+    var end_tag = "{{ end_tag_json|escapejs }}";
+</script>
+<script type="text/javascript" src="{% static 'js/view.js' %}"></script>
+</body>
+</html>

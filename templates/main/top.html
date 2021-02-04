@@ -1,0 +1,12 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/top.css' %}">
+{% endblock %}
+{% block content %}
+<div>
+    <div class="btn-area">
+        <a href="{% url 'project:project_list' %}" class="btn">プロジェクト一覧へ</a>
+    </div>
+</div>
+{% endblock content %}

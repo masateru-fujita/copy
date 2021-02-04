@@ -1,0 +1,71 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/project.css' %}">
+{% endblock %}
+{% block content %}
+<div class="project-wrap">
+    <div class="breadcrumb">
+        <a href="{% url 'main:top' %}">TOP</a>
+        <p class="separation">></p>
+        <p>プロジェクト一覧</p>
+    </div>
+    <div class="project-form">
+        <p class="display-form-btn">追加</p>
+        <form action="" method="post" class="add-form">
+            {% csrf_token %}
+            <div class="form-col">
+                <label for="title">タイトル</label>
+                {{ form.title.errors }}
+                <input type="text" id="title" name="title">
+            </div>
+            <div class="form-col">
+                <label for="description">詳細</label>
+                {{ form.description.errors }}
+                <textarea id="description" name="description"></textarea>
+            </div>
+            <div class="btn-area">
+                <input class="btn" type="submit" value="追加する">
+            </div>
+        </form>
+    </div>
+    <div class="prj-list">
+        <p>プロジェクト一覧</p>
+        <div class="prj-item-wrap">
+            {% for project in projects %}
+            <div class="project-box">
+                <div class="project-info">
+                    <div class="prj-title">
+                        <div>
+                            <p>タイトル</p>
+                            <img src="{% static 'images/' %}edit.png" class="edit-title-btn" />
+                        </div>
+                        <p class="title">{{ project.title }}</p>
+                    </div>
+                    <div class="prj-body">
+                        <div>
+                            <p>詳細</p>
+                            <img src="{% static 'images/' %}edit.png" class="edit-description-btn" />
+                        </div>
+                        <p class="description">{{ project.description }}</p>
+                    </div>
+                </div>
+                <div class="delete-btn-area">
+                    <img src="{% static 'images/' %}delete.png" class="delete-btn" />
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+    <script type="text/javascript">
+        var editUrl = "{% url 'project:edit_project' %}";
+        var projectIds = [];
+        {% for project in projects %}
+            projectIds.push("{{ project.pk|escapejs }}");
+        {% endfor %}
+    </script>
+    <script type="text/javascript" src="{% static 'js/project.js' %}"></script>
+{% endblock %}

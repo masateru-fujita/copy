@@ -1,0 +1,69 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/video_list.css' %}">
+{% endblock %}
+{% block content %}
+<div class="video-wrap">
+    <div class="breadcrumb">
+        <a href="{% url 'main:top' %}">TOP</a>
+        <p class="separation">></p>
+        <a href="{% url 'project:project_list' %}">プロジェクト一覧</a>
+        <p class="separation">></p>
+        <p>{{ project.title }}</p>
+    </div>
+    <div class="video-form">
+        <p class="display-form-btn">追加</p>
+        <form action="" class="add-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-col">
+                <label for="title">タイトル</label>
+                {{ form.title.errors }}
+                <input type="text" id="title" name="title">
+            </div>
+            <div class="form-col">
+                <label for="video">動画</label>
+                {{ form.video.errors }}
+                <div class="file-col">
+                    <label for="main-video">
+                        <input type="file" accept='video/*' id="main-video" class="file" name="video">
+                        <p>ファイルを選択</p>
+                    </label>
+                    <p class="file-name">選択されていません</p>
+                </div>
+            </div>
+            <button type="button" class="add-switching-video">スイッチング動画追加</button>
+            <div class="btn-area">
+                <input type="submit" class="btn" name="video-add-btn" value="追加する">
+            </div>
+        </form>
+    </div>
+    <div class="video-all">
+        <p>動画一覧</p>
+        <div class="video-list">
+            {% for video in videos %}
+                <div class="video-box">
+                    <div class="video-title">
+                        <p>{{ video.title }}</p>
+                        <div class="edit-btn-area">
+                            <img src="{% static 'images/' %}edit.png" class="edit-btn" />
+                            <img src="{% static 'images/' %}delete.png" class="delete-btn" />
+                        </div>
+                    </div>
+                    <div class="video-thumb"><img src="{% static 'videos/' %}{{video.project_id}}/{{ video.id }}/thumb/{{ video.id }}.jpg"></div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+    <script type="text/javascript">
+        var editUrl = "{% url 'video:edit_video' %}";
+        var videoIds = [];
+        {% for video in videos %}
+            videoIds.push("{{ video.pk|escapejs }}");
+        {% endfor %}
+    </script>
+    <script type="text/javascript" src="{% static 'js/video_list.js' %}"></script>
+{% endblock %}

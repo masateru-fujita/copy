@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% load static %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/destyle.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block css %}{% endblock %}
+    <script type="text/javascript" src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <title>TOP</title>
+</head>
+<body>
+<div id="wrapper">
+    <header>
+        <nav>
+            <h1><img class="logo" src="{% static 'images/' %}logo.png" /></h1>
+            <a href="{% url 'main:top' %}">TOP</a>
+            <ul class="nav-item">
+                {% if user.is_authenticated %}
+                    <li><a href="">{{ user.get_username }}様</a></li>
+                    <li><a href="{% url 'main:logout' %}">Log out</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <div id="bg-circle-wrap">
+        <div class="bg-circle-1">
+            <div class="bg-circle-1-in"></div>
+        </div>
+        <div class="bg-circle-2">
+            <div class="bg-circle-2-in"></div>
+        </div>
+        <div class="bg-circle-3">
+            <div class="bg-circle-3-in"></div>
+        </div>
+        <div class="bg-circle-4">
+            <div class="bg-circle-4-in"></div>
+        </div>
+        <div class="bg-circle-5">
+            <div class="bg-circle-5-in"></div>
+        </div>
+        <div class="bg-circle-6">
+            <div class="bg-circle-6-in"></div>
+        </div>
+        <div class="bg-circle-7">
+            <div class="bg-circle-7-in"></div>
+        </div>
+        <div class="bg-circle-8">
+            <div class="bg-circle-8-in"></div>
+        </div>
+        <div class="bg-circle-9">
+            <div class="bg-circle-9-in"></div>
+        </div>
+        <div class="bg-circle-10">
+            <div class="bg-circle-10-in"></div>
+        </div>
+    </div>
+    <div id="contents">
+        {% block content %}
+        {% endblock content %}
+    </div>
+    <footer>
+    </footer>
+</div>
+{% block js %}{% endblock %}
+</body>
+</html>

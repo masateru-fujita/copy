@@ -1,0 +1,219 @@
+body, html {
+    height: 100%;
+}
+
+#wrapper {
+    width: 100%;
+    height: 100%;
+    margin: 0px auto;
+}
+
+header, footer {
+    height: 6%;
+    color: black;
+    position: relative;
+}
+
+header {
+    background-color: #A9D8FF;
+}
+
+footer {
+    background-color: #DEE7F7;
+    bottom: 0;
+}
+
+#contents {
+    height: 88%;
+    background-color: #F4F6F9;
+}
+
+h1 {
+    height: 100%;
+}
+
+.logo {
+    height: 100%;
+    padding: 10px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+nav > a {
+    font-weight: bold;
+    font-size: 130%;
+    padding: 10px;
+}
+
+nav > a:hover {
+    text-decoration: none;
+    color: black
+}
+
+.nav-item {
+    display: flex;
+}
+
+.nav-item > li {
+    margin: 10px;
+}
+
+.nav-item > li > a {
+    color: black;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.errorlist {
+    color: red;
+}
+
+#contents > div {
+    position: relative;
+    z-index: 1;
+}
+
+/* バックグラウンドデザイン */
+.bg-circle-1 {
+    width: 10%;
+    position: absolute;
+    top: 6%;
+    right: 9%;
+}
+.bg-circle-1-in {
+    background-color: #D9E0E5;
+    width: 100%;
+    padding-top: 50%;
+    border-radius: 50% / 0 0 100% 100%;
+}
+
+.bg-circle-2 {
+    width: 3.5%;
+    position: absolute;
+    top: 6%;
+    right: 0;
+}
+.bg-circle-2-in {
+    background-color: #EDEFF3;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 50% / 0 0 0 100%;
+}
+
+.bg-circle-3 {
+    width: 3%;
+    position: absolute;
+    top: 12%;
+    right: 5%;
+}
+.bg-circle-3-in {
+    background-color: #E0EEF6;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-4 {
+    width: 8%;
+    position: absolute;
+    top: 15%;
+    right: 20%;
+}
+.bg-circle-4-in {
+    background-color: #E0EEF6;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-5 {
+    width: 9%;
+    position: absolute;
+    top: 22%;
+    right: 0;
+}
+.bg-circle-5-in {
+    background-color: #EDEFF3;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-6 {
+    width: 8%;
+    position: absolute;
+    top: 55%;
+    right: 18%;
+}
+.bg-circle-6-in {
+    background-color: #EDEFF3;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-7 {
+    width: 17%;
+    position: absolute;
+    top: 35%;
+    right: 3%;
+}
+.bg-circle-7-in {
+    background-color: #D9E0E5;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-8 {
+    width: 4%;
+    position: absolute;
+    top: 70%;
+    right: 14%;
+}
+.bg-circle-8-in {
+    background-color: #E0EEF6;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-9 {
+    width: 15%;
+    position: absolute;
+    bottom: 0;
+    right: 20%;
+}
+.bg-circle-9-in {
+    background-color: #E0EEF6;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 100%;
+}
+
+.bg-circle-10 {
+    width: 8%;
+    position: absolute;
+    bottom: 6%;
+    right: 8%;
+}
+.bg-circle-10-in {
+    background-color: #D9E0E5;
+    width: 100%;
+    padding-top: 50%;
+    border-radius: 50% / 100% 100% 0 0;
+}
+
+/* パンくずリスト */
+.breadcrumb {
+    margin-bottom: 0;
+    height: 48px;
+}
+
+.separation {
+    margin: 0 5px;
+}

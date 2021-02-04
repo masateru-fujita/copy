@@ -1,0 +1,181 @@
+.video-wrap {
+    width: 100%;
+    height: 100%;
+}
+
+/* サイドメニュー（追加フォーム） */
+.display-form-btn {
+    width: 50px;
+    height: 12%;
+    position: absolute;
+    top: 4%;
+    right: 0;
+    writing-mode: vertical-lr;
+    cursor: pointer;
+    text-align: center;
+    padding-left: 15px;
+    background-color: #8497B0;
+    border-radius: 10px 0 0 10px;
+    color: white;
+    opacity: 0.9;
+}
+
+.display-form-btn:hover {
+    background-color: #F8B500;
+    opacity: 0.9;
+}
+
+.add-form{
+    width: 400px;
+    right: -400px;
+    height: 100%;
+    color: white;
+    background-color: #8497B0;
+    opacity: 0.9;
+    position: fixed;
+    z-index: 99;
+    top: 6%;
+}
+
+.form-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-col > label {
+    margin: 20px 0 0 20px;
+}
+
+.form-col > input {
+    background-color: white;
+    border-radius: 15px;
+    color: black;
+    padding: 10px;
+    margin: 20px;
+}
+
+.btn-area {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    text-align: center;
+    width: 125px;
+    height: 50px;
+    border-radius: 25px;
+    margin-top: 10px;
+    background-color: #002C50;
+    color: white;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.btn:hover {
+    background-color: #F8B500;
+    color: white;
+    opacity: 0.9;
+}
+
+.file {
+    display: none;
+}
+
+.file-col {
+    margin: 10px;
+    display: flex;
+}
+
+.file-col > label {
+    margin: 10px;
+    padding: 10px;
+    background-color: white;
+    color: #555;
+    font-weight: 500;
+    opacity: 0.9;
+    cursor: pointer;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.file-col > p {
+    margin: auto auto auto 10px;
+}
+
+.add-form > button {
+    display: block;
+    background-color: #436581;
+    margin: 10px 10px 10px auto;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid;
+}
+
+/* 動画一覧 */
+.video-all{
+    width: 80%;
+    margin: 0 auto;
+}
+
+.video-all > p {
+    padding: 20px 0;
+    font-weight: bold;
+    font-size: 150%;
+    color: #555;
+}
+
+.video-list {
+    display: flex;
+    flex-wrap:wrap;
+}
+
+.video-box {
+    width: 200px;
+    margin: 10px;
+    padding: 5px;
+    background-color: white;
+    box-shadow: 0 0 0 1px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.video-thumb > img {
+    width: 190px;
+}
+
+.video-title {
+    border-radius: 10px 10px 0 0;
+    background-color: #CCC;
+    padding: 10px;
+    overflow-wrap: break-word;
+    display: flex;
+}
+
+.video-title > p {
+    word-wrap: break-word;
+    width: 110px;
+}
+
+.edit-btn-area {
+    position: relative;
+    margin: auto 0 0 auto;
+}
+
+.edit-btn-area > img {
+    height: 24px;
+    padding: 3px;
+}
+
+.edit-btn-area > img:first-child {
+    margin-right: 3px;
+}
+
+.delete-btn {
+    z-index: 1;
+}
+
+.edit-title {
+    width: 110px;
+}

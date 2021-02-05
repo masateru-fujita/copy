@@ -235,7 +235,24 @@
 
 .popup-content{
     margin: 5%;
+}
+
+.popup-switch-field {
     display: flex;
+}
+
+.popup-btn-field {
+    cursor: pointer;
+    max-width: 200px;
+    text-align: center;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 25px;
+    display: none;
+}
+.popup-btn-field:hover {
+    background-color: #F8B500;
 }
 
 .popup-img {

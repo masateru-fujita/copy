@@ -1,35 +1,33 @@
 from django.db import models
+from django.utils import timezone
 from video.models import VideoRelation, Video, LinkTag
 
-# class TagAnalysis(models.Model):
-#     tag = models.ForeignKey(LinkTag, on_delete=models.CASCADE)
-#     clickCount = models.IntegerField()
+class UserAnalysis(models.Model):
+    user_agent = models.CharField(max_length=200)
+    video_relation = models.ForeignKey(VideoRelation, on_delete=models.SET_NULL, null=True)
+    user_cookie = models.CharField(max_length=100)
+    access_time = models.DateTimeField(default=timezone.now)
+    leave_time = models.DateTimeField(null=True)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
 
-#     def __str__(self):
-#         return self.tag
+    def __str__(self):
+        return self.user_agent
 
-#     class Meta:
-#         db_table = 'TagAnalysis'
+    class Meta:
+        db_table = 'UserAnalysis'
 
-# class VideoRelationAnalysis(models.Model):
-#     videoRelation = models.ForeignKey(VideoRelation, on_delete=models.CASCADE)
-#     playCount = models.IntegerField()
-    
+class ActionAnalysis(models.Model):
+    user_analysis = models.ForeignKey(UserAnalysis, on_delete=models.SET_NULL, null=True)
+    tag = models.ForeignKey(LinkTag, on_delete=models.SET_NULL, null=True)
+    action_type = models.CharField(max_length=10)
+    action_time = models.DateTimeField(default=timezone.now)
+    switch_video = models.ForeignKey(Video, on_delete=models.SET_NULL, null=True)
+    story_play_time = models.DateField(null=True)
+    popup_btn_flg = models.IntegerField(null=True)
 
-#     def __str__(self):
-#         return self.videoRelation
+    def __str__(self):
+        return self.action_type
 
-#     class Meta:
-#         db_table = 'VideoRelationAnalysis'
-
-# class VideoAnalysis(models.Model):
-#     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-#     playCount = models.IntegerField()
-#     swichingCount = models.IntegerField()
-    
-
-#     def __str__(self):
-#         return self.video
-
-#     class Meta:
-#         db_table = 'VideoAnalysis'
+    class Meta:
+        db_table = 'ActionAnalysis'

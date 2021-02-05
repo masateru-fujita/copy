@@ -1,10 +1,10 @@
 $('.popup-type-general').change(function () {
     if($(this).val() == 'default'){
-        $('.popup-content').css('display', 'flex');
+        $('.popup-switch-field').css('display', 'flex');
         $('.popup-img-field').css('display', 'block');
     }
     else if($(this).val() == 'vertical'){
-        $('.popup-content').css('display', 'block');
+        $('.popup-switch-field').css('display', 'block');
         $('.popup-img-field').css('display', 'block');
     }
     else if($(this).val() == 'text'){

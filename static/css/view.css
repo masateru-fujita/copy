@@ -33,6 +33,20 @@
     cursor: pointer;
 }
 
+/* ポップアップ */
+.popup-btn-field {
+    cursor: pointer;
+    max-width: 200px;
+    text-align: center;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 25px;
+}
+.popup-btn-field:hover {
+    background-color: #F8B500;
+}
+
 /* ポップアップ, 終了タグ */
 .popup-field, .endtag-field {
     display: none;

@@ -14,7 +14,7 @@ class VideoForm(forms.ModelForm):
 class LinkTagForm(forms.ModelForm):
     class Meta:
         model = LinkTag
-        fields = ('video', 'title', 'action_type', 'link_url', 'story_next_video', 'story_start_flame', 'popup_type', 'popup_img', 'popup_text', 'x_coordinate', 'y_coordinate', 'width', 'height', 'display_frame', 'hide_frame')
+        fields = ('video', 'title', 'action_type', 'link_url', 'story_next_video', 'story_start_flame', 'popup_type', 'popup_img', 'popup_text', 'popup_btn_text', 'popup_btn_url', 'x_coordinate', 'y_coordinate', 'width', 'height', 'display_frame', 'hide_frame')
 
 class EndTagForm(forms.ModelForm):
     class Meta:

@@ -24,7 +24,7 @@ class VideoRelation(models.Model):
 class Video(models.Model):
     video_relation = models.ForeignKey(VideoRelation, on_delete=models.CASCADE)
     video = models.FileField(upload_to=get_upload_to, null=True)
-    date_created = models.DateField(default=timezone.now)
+    created_at = models.DateField(default=timezone.now)
 
     class Meta:
         db_table = 'Video'
@@ -58,14 +58,14 @@ class LinkTag(models.Model):
     popup_img = models.FileField(upload_to=get_popup_upload_to, null=True, blank=True)
     popup_text = models.CharField(max_length=100, default='', blank=True, null=True)
     popup_btn_text = models.CharField(max_length=100, default='', blank=True, null=True)
-    popup_btn_url = models.CharField(max_length=100, default='', blank=True, null=True)
+    popup_btn_url = models.URLField(max_length=100, default='', blank=True, null=True)
     x_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     y_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     width = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     height = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     display_frame = models.IntegerField(blank=False, null=False)
     hide_frame = models.IntegerField(blank=False, null=False)
-    date_created = models.DateField(default=timezone.now)
+    created_at = models.DateField(default=timezone.now)
 
     def filename(self):
         return os.path.basename(self.file.name)

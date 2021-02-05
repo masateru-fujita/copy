@@ -236,6 +236,18 @@ function createPopupTag(link_tag) {
             $('.popup-text-field').text($('#popup-text-' + link_tag['pk']).val());
         }
 
+        // テキスト設定
+        if($('#popup-btn-text-' + link_tag['pk']).val() == ''){
+            $('.popup-btn-field').text(link_tag['fields']['popup_text']);
+            $('.popup-btn-field').css('display', 'block');
+        }
+        else
+        {
+            $('.popup-btn-field').text($('#popup-btn-text-' + link_tag['pk']).val());
+            $('.popup-btn-field').css('display', 'block');
+        }
+        setPopupBtnEventFromLinkTag(link_tag, $('#popup-btn-text-' + link_tag['pk']));
+
         var popup_field_wrap = document.getElementById('popup-field-wrap');
         popup_field_wrap.style.display = "block";
 
@@ -448,24 +460,16 @@ function createSideTagEvent(link_tag){
             'visibility': 'visible',
         });
         if(link_tag['fields']['popup_type'] == 'default'){
-            $('.popup-content').css('display', 'flex');
-            $('.popup-img-field').attr('src', '/' + link_tag['fields']['popup_img']);
-            $('.popup-text-field').text(link_tag['fields']['popup_text']);
-            $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_text]').val(link_tag['fields']['popup_text']);
+            $('.popup-switch-field').css('display', 'flex');
             $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_type]:eq(0)').prop('checked', true);
         }
         else if(link_tag['fields']['popup_type'] == 'vertical'){
-            $('.popup-content').css('display', 'block');
-            $('.popup-img-field').attr('src', '/' + link_tag['fields']['popup_img']);
-            $('.popup-text-field').text(link_tag['fields']['popup_text']);
-            $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_text]').val(link_tag['fields']['popup_text']);
+            $('.popup-switch-field').css('display', 'block');
             $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_type]:eq(1)').prop('checked', true);
         }
         else if(link_tag['fields']['popup_type'] == 'text'){
-            $('.popup-content').css('display', 'block');
+            $('.popup-switch-field').css('display', 'block');
             $('.popup-img-field').css('display', 'none');
-            $('.popup-text-field').text(link_tag['fields']['popup_text']);
-            $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_text]').val(link_tag['fields']['popup_text']);
             $('#tag-per-form-' + link_tag['pk']).find('input[name=popup_type]:eq(2)').prop('checked', true);
         }
     });
@@ -473,13 +477,12 @@ function createSideTagEvent(link_tag){
     $(".popup-type-" + link_tag['pk']).change(function () {
         setPopupImgFromLinkTag(link_tag, $(this).parent().parent());
         setPopupTextFromLinkTag(link_tag, $(this).parent().parent());
+        setPopupBtnEventFromLinkTag(link_tag, $(this));
         if($(this).val() == 'default'){
-            $('.popup-content').css('display', 'flex');
-            $('.popup-img-field').css('display', 'block');
+            $('.popup-switch-field').css('display', 'flex');
         }
         else if($(this).val() == 'vertical'){
-            $('.popup-content').css('display', 'block');
-            $('.popup-img-field').css('display', 'block');
+            $('.popup-switch-field').css('display', 'block');
         }
         else if($(this).val() == 'text'){
             $('.popup-img-field').css('display', 'none');
@@ -489,6 +492,7 @@ function createSideTagEvent(link_tag){
 
     $('#popup-img-' + link_tag['pk']).on('change', function (e) {
         setPopupTextFromLinkTag(link_tag, $(this));
+        setPopupBtnEventFromLinkTag(link_tag, $(this));
         var reader = new FileReader();
         var img = $(this).parent().find('input[name="popup_img"]').prop('files')[0];
         reader.onload = function (e) {
@@ -502,15 +506,25 @@ function createSideTagEvent(link_tag){
 
     $('#popup-text-' + link_tag['pk']).on('change', function (e) {
         setPopupImgFromLinkTag(link_tag, $(this));
+        setPopupBtnEventFromLinkTag(link_tag, $(this));
         $('.popup-text-field').text($(this).val())
         $('#popup-field-wrap').css('display', 'block');
     });
 
+    $('#popup-btn-text-' + link_tag['pk']).on('change', function (e) {
+        setPopupImgFromLinkTag(link_tag, $(this));
+        setPopupTextFromLinkTag(link_tag, $(this));
+        setPopupBtnEventFromLinkTag(link_tag, $(this));
+        $('.popup-btn-field').text($(this).val())
+        $('.popup-btn-field').css('display', 'block');
+        $('#popup-field-wrap').css('display', 'block');
+    });
 
     $('#popup-preview-btn-' + link_tag['pk']).on('click', function(e) {
         // 画像設定
         setPopupImgFromLinkTag(link_tag, $(this));
         setPopupTextFromLinkTag(link_tag, $(this));
+        setPopupBtnEventFromLinkTag(link_tag, $(this));
     });
 };
 
@@ -529,6 +543,8 @@ $('#popup-preview-btn-general').on('click', function(e) {
     }
     // テキスト設定
     $('.popup-text-field').text($(this).parent().find('input[name="popup_text"]').val());
+    // POPUPボタン押下イベント
+    setPopupBtnEventFromGeneral();
 });
 
 // 画像変更時
@@ -552,6 +568,24 @@ $('#popup-text-general').on('change', function (e) {
     $('#popup-field-wrap').css('display', 'block');
     // 画像設定
     setPopupImgFromGeneral($(this));
+});
+
+// ボタン文字変更時
+$('#popup-btn-text-general').on('change', function (e) {
+    $('.popup-btn-field').text($(this).val())
+    if ($(this).val() != ""){
+        $('.popup-btn-field').css('display', 'block');
+    }
+    else {
+        $('.popup-btn-field').css('display', 'none');
+    }
+    $('#popup-field-wrap').css('display', 'block');
+    // 画像設定
+    setPopupImgFromGeneral($(this));
+    // テキスト設定
+    setPopupTextFromGeneral($(this));
+    // ボタンクリックイベント設定
+    setPopupBtnEventFromGeneral();
 });
 
 // idから要素ID取得
@@ -618,8 +652,48 @@ function setPopupTextFromGeneral(element){
     $('.popup-text-field').text(element.parent().find('input[name="popup_text"]').val());
 }
 
-videoClickEvent();
+// タグ追加時ポップアップボタンクリックイベント
+function setPopupBtnEventFromGeneral(){
+    if($('#popup-btn-text-general').val() != ''){
+        $('.popup-btn-field').css('display', 'block');
+        $('.popup-btn-field').text($('#popup-btn-text-general').val());
+    }
+    $('.popup-btn-field').off('click');
+    $('.popup-btn-field').on("click", function () {
+        console.log($('#popup-btn-url-general').val());
+        window.open($('#popup-btn-url-general').val(), '_blank');
+    });
+}
 
+// タグ編集時ポップアップボタンクリックイベント
+function setPopupBtnEventFromLinkTag(link_tag, element){
+    console.log($('#popup-btn-text-' + link_tag['pk']).val());
+    if($('#popup-btn-text-' + link_tag['pk']).val() != ''
+        || link_tag['fields']['popup_text'] != ''){
+            $('.popup-btn-field').css('display', 'block');
+            if($('#popup-btn-text-' + link_tag['pk']).val() != ''){
+                $('.popup-btn-field').text($('#popup-btn-text-' + link_tag['pk']).val());
+            }
+            else if(link_tag['fields']['popup_text'] != ''){
+                $('.popup-btn-field').text(link_tag['fields']['popup_text'].val());
+            }
+    }
+    $('.popup-btn-field').off('click');
+    $('.popup-btn-field').on("click", function () {
+        if(element.parent().find('input[name="popup_btn_url"]').val() == ''){
+            $('.popup-text-field').text(link_tag['fields']['popup_text']);
+            window.open(link_tag['fields']['popup_btn_url'], '_blank');
+        }
+        else
+        {
+            console.log('hogehoge');
+            window.open($(element.parent().find('input[name="popup_btn_url"]')).val(), '_blank');
+        }
+    });
+}
+
+// サブビデオクリック時
+videoClickEvent();
 function videoClickEvent(){
     $('#video-field').children('.video').prop('muted', false);
     $('.video-flex-box').children('.video').on("click", function () {
@@ -628,58 +702,6 @@ function videoClickEvent(){
         $('#video-field').prepend($(this));
         $(this).off();
         videoClickEvent();
-
-        // Ajax通信を開始する
-        // $.ajax({
-        //     url: url_for_story,
-        //     method: "GET",
-        //     data: {"next_video": json_tag["fields"]["story_next_video"]}
-        // })
-        // .then(
-        //     // 1つめは通信成功時のコールバック
-        //     function (data) {
-        //         // 動画タグ情報を削除する
-        //         var removeChilds = Array.from(document.getElementsByClassName('link-tag'));
-
-        //         removeChilds.forEach(element => {
-        //             element.remove();
-        //         });
-        //         tag_elements = [];
-
-        //         // JSONデータ解析
-        //         var all_data = JSON.parse(data)[0];
-                
-        //         // videoデータ解析
-        //         var video_data = JSON.parse(all_data["video"]);
-        //         video = $('.video').first();
-        //         video.attr('src', '/' + video_data[0]["fields"]['video']);
-
-        //         video.load();
-        //         // 次の時間計算
-        //         // video読み込み後
-        //         video.onloadedmetadata = function(){
-        //             document.getElementById("time-duration").innerHTML = timeFormat(video.duration);
-        //             document.getElementById("frame-total").innerHTML = Math.ceil(video.duration * fps);
-        //             video.currentTime = video.duration * (json_tag["fields"]['story_start_flame'] / (video.duration * fps));
-        //         };
-        //         video.play();
-        //         switchPlayFlg();
-
-        //         // link_tagデータ解析
-        //         obj_link_tags = JSON.parse(all_data["link_tag"]);
-        //         createTags(obj_link_tags);
-
-        //         // end_tagデータ解析
-        //         var end_tag_data = JSON.parse(all_data["end_tag"]);
-        //         obj_end_tags = end_tag_data;
-
-        //         console.log("読み込み成功");
-        //     },
-        //     // 2つめは通信失敗時のコールバック
-        //     function () {
-        //         console.log("読み込み失敗");
-        //     }
-        // );
     });
 }
 

@@ -33,8 +33,10 @@
                 {% endif %}
             {% endfor %}
             <div class="popup-field">
-                <img src="/static/images/video/noimage.png" class="popup-img-field">
-                <p class="popup-text-field"></p>
+                <div class="popup-switch-field">
+                    <img src="/static/images/video/noimage.png" class="popup-img-field">
+                    <p class="popup-text-field"></p>
+                </div>
                 <button id="popup-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
             </div>
             <div class="endtag-field">
@@ -62,8 +64,11 @@
             </div>
         </div>
     </div>
+{% csrf_token %}
 <script type="text/javascript">
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     var next_video_url = "{% url 'view:get_next_video' %}";
+    var set_user_analysis = "{% url 'view:set_user_analysis' %}";
     var json_tags = "{{ link_tags_json|escapejs }}";
     var end_tag = "{{ end_tag_json|escapejs }}";
 </script>

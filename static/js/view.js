@@ -195,16 +195,32 @@ function createPopupTag(link_tag_fields){
                 switch (link_tag_fields['popup_type']){
                     case 'default':
                         $('.popup-img-field').css('display', 'block');
-                        $('.popup-field').css('display', 'flex');
+                        $('.popup-switch-field').css('display', 'flex');
                         break;
                     case 'vertical':
                         $('.popup-img-field').css('display', 'block');
-                        $('.popup-field').css('display', 'block');
+                        $('.popup-switch-field').css('display', 'block');
                         break;
                     case 'text':
                         $('.popup-img-field').css('display', 'none');
-                        $('.popup-field').css('display', 'block');
+                        $('.popup-switch-field').css('display', 'block');
                         break;
+                }
+                // POPUPボタンがあれば削除する
+                if($('.popup-btn-field').length){
+                    $('.popup-btn-field').remove();
+                }
+                if((link_tag_fields['popup_btn_text'] != '') && (link_tag_fields['popup_btn_url'] != '')){
+                    var popup_btn = $('<div></div>', {
+                        class: "popup-btn-field",
+                        text: link_tag_fields['popup_btn_text'],
+                        on: {
+                            click: function(event){
+                                window.open(link_tag_fields['popup_btn_url'], '_blank');
+                            }
+                        }
+                    });
+                    $('.popup-field').append(popup_btn);
                 }
                 $('.popup-field').css('display', 'block')
                 if(is_playing){
@@ -301,3 +317,56 @@ function createStoryTag(link_tag_fields){
     });
     return tag;
 };
+
+// csrf_tokenの取得
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// Ajax通信を開始する
+date = new Date();
+aaa = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate();
+bbb = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+hoge = String(aaa + ' ' + bbb);
+console.log(hoge);
+$.ajax({
+    url: set_user_analysis,
+    method: "POST",
+    data: {
+        "video_relation_id": location.pathname.replace(/[^0-9]/g, ''),
+        "access_time": hoge,
+        "leave_time": hoge,
+        "start_time": hoge,
+        "end_time": hoge,
+    },
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+        }
+    },
+})
+.then(
+    // 1つめは通信成功時のコールバック
+    function (data) {
+        console.log(data);
+    },
+    // 2つめは通信失敗時のコールバック
+    function () {
+        console.log("読み込み失敗");
+    }
+);

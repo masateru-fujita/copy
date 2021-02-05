@@ -30,8 +30,11 @@
                 {% endfor %}
                 <div id="popup-field-wrap" class="popup-field-wrap">
                     <div class="popup-content">
-                        <img src="/static/images/video/noimage.png" class="popup-img-field">
-                        <p class="popup-text-field"></p>
+                        <div class="popup-switch-field">
+                            <img src="/static/images/video/noimage.png" class="popup-img-field">
+                            <p class="popup-text-field"></p>
+                        </div>
+                        <div class="popup-btn-field"></div>
                     </div>
                     <button id="popup-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
                 </div>
@@ -133,7 +136,12 @@
                             <p class="file-name">選択されていません</p>
                             <!-- テキスト -->
                             <label>表示文字</label>
-                            <input type="text" id="popup-text-{{ link_tag.id }}" name="popup_text" class="popup-text form-control">
+                            <input type="text" id="popup-text-{{ link_tag.id }}" name="popup_text" class="popup-text form-control" value="{{ link_tag.popup_text }}">
+                            <p>リンクボタン設定</p>
+                            <label class="formGroupExampleInput">ボタン文字</label>
+                            <input type="text" id="popup-btn-text-{{ link_tag.id }}" name="popup_btn_text" class="popup-btn-text form-control" value="{{ link_tag.popup_btn_text }}">
+                            <label class="formGroupExampleInput">リンクURL</label>
+                            <input type="text" id="popup-btn-url-{{ link_tag.id }}" name="popup_btn_url" class="popup-btn-url form-control" value="{{ link_tag.popup_btn_url }}">
                             <input type="hidden" name="video-width">
                             <input type="hidden" name="video-height">
                             <button type="button" id="popup-preview-btn-{{ link_tag.id }}" class="popup-preview-btn">プレビュー</button>
@@ -225,6 +233,11 @@
                                 <!-- テキスト -->
                                 <label class="formGroupExampleInput">表示文字</label>
                                 <input type="text" id="popup-text-general" name="popup_text" class="popup-text form-control">
+                                <p>リンクボタン設定</p>
+                                <label class="formGroupExampleInput">ボタン文字</label>
+                                <input type="text" id="popup-btn-text-general" name="popup_btn_text" class="popup_btn_text form-control">
+                                <label class="formGroupExampleInput">リンクURL</label>
+                                <input type="text" id="popup-btn-url-general" name="popup_btn_url" class="popup_btn_url form-control">
                                 <input type="hidden" name="video-width">
                                 <input type="hidden" name="video-height">
                                 <button type="button" id="popup-preview-btn-general" class="popup-preview-btn">プレビュー</button>

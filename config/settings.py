@@ -85,9 +85,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mil',
+        'NAME': 'copy',
         'USER': 'root',
-        'PASSWORD': 'cladmin',
+        'PASSWORD': '!Masa6273',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -132,7 +132,7 @@ STATIC_URL = '/static/'
 STATICFILES = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    '/workspace/mil/static/',
+    '/copy/static/',
 ]
 
 LOGIN_URL = 'main:login' 

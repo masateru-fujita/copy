@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '&gm%asaqubqeda(gm!hwt&@51)6$7ekdj$36#xazy!nz7qeby*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Application definition
 
@@ -139,21 +139,7 @@ LOGIN_URL = 'main:login'
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-if DEBUG:
-    def show_toolbar(request):
-        return True
-
-    INSTALLED_APPS += (
-        'debug_toolbar',
-    )
-    MIDDLEWARE += (
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
-    DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': show_toolbar,
-    }
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
 
 LOGGING = {
     'version': 1,

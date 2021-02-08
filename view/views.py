@@ -60,8 +60,6 @@ def setUserAnalysis(request):
         userAnalysis.video_relation = VideoRelation.objects.get(pk=request.POST.get('video_relation_id'))
         userAnalysis.save()
 
-        print(userAnalysis.pk)
-
         return HttpResponse(userAnalysis.pk)
 
     return HttpResponse('NG')

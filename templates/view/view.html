@@ -24,7 +24,7 @@
                     <div class="video-flex-box">
                 {% endif %}
                 {% if not forloop.first %}
-                <video class="video" muted>
+                <video id="{{ video.pk }}" class="video" muted>
                     <source src="/{{ video.video }}">
                 </video>
                 {% endif %}
@@ -64,11 +64,11 @@
             </div>
         </div>
     </div>
-{% csrf_token %}
 <script type="text/javascript">
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     var next_video_url = "{% url 'view:get_next_video' %}";
     var set_user_analysis = "{% url 'view:set_user_analysis' %}";
+    var set_action_analysis = "{% url 'view:set_action_analysis' %}";
+    var set_popup_action_btn = "{% url 'view:set_popup_action_btn' %}";
     var json_tags = "{{ link_tags_json|escapejs }}";
     var end_tag = "{{ end_tag_json|escapejs }}";
 </script>

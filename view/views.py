@@ -6,11 +6,11 @@ from video.models import VideoRelation, Video, LinkTag, EndTag
 from django.core import serializers
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.utils.decorators import method_decorator
-from datetime import datetime
 from django.utils.timezone import make_aware
 
 import json
 import secrets
+import datetime
 
 @method_decorator(xframe_options_exempt, name='dispatch')
 class VideoViewListView(ListView):
@@ -54,17 +54,51 @@ def getNextVideo(request):
 @xframe_options_exempt
 def setUserAnalysis(request):
     if request.method == 'POST':
-        print(request.POST.get('video_relation_id'))
         userAnalysis = UserAnalysis()
         userAnalysis.user_agent = request.META['HTTP_USER_AGENT']
         userAnalysis.user_cookie = request.COOKIES.get('conlad_v_u')
         userAnalysis.video_relation = VideoRelation.objects.get(pk=request.POST.get('video_relation_id'))
-        userAnalysis.access_time = make_aware(datetime.strptime(request.POST.get('access_time'), "%Y-%m-%d %H:%M:%S"))
-        userAnalysis.leave_time = make_aware(datetime.strptime(request.POST.get('leave_time'), "%Y-%m-%d %H:%M:%S"))
-        userAnalysis.start_time = make_aware(datetime.strptime(request.POST.get('start_time'), "%Y-%m-%d %H:%M:%S"))
-        userAnalysis.end_time = make_aware(datetime.strptime(request.POST.get('end_time'), "%Y-%m-%d %H:%M:%S"))
         userAnalysis.save()
 
-        return HttpResponse('OK')
+        print(userAnalysis.pk)
+
+        return HttpResponse(userAnalysis.pk)
+
+    return HttpResponse('NG')
+
+# アクセス情報保存
+@xframe_options_exempt
+def setActionAnalysis(request):
+    if request.method == 'POST':
+        actionAnalysis = ActionAnalysis()
+        actionAnalysis.user_analysis = UserAnalysis.objects.get(pk=request.POST.get('user_analysis_id'))
+        if(request.POST.get('action_type') != 'switch'):
+            actionAnalysis.tag = LinkTag.objects.get(pk=request.POST.get('tag_id'))
+        actionAnalysis.action_type = request.POST.get('action_type')
+        actionAnalysis.action_time = str(datetime.timedelta(seconds=float(request.POST.get('action_time'))))
+        if request.POST.get('action_type') == "link":
+            pass
+        elif request.POST.get('action_type') == "popup":
+            pass
+        elif request.POST.get('action_type') == "story":
+            pass
+        elif request.POST.get('action_type') == "switch":
+            actionAnalysis.switch_video = Video.objects.get(pk=request.POST.get('switch_video_id'))
+
+        actionAnalysis.save()
+
+        return HttpResponse(actionAnalysis.pk)
+
+    return HttpResponse('NG')
+
+# POPUPボタン押下イベント時
+@xframe_options_exempt
+def setPopupActionBtn(request):
+    if request.method == 'POST':
+        actionAnalysis = ActionAnalysis.objects.get(pk=request.POST.get('popup_analysis_id'))
+        actionAnalysis.popup_btn_flg = True
+        actionAnalysis.save()
+
+        return HttpResponse(actionAnalysis.pk)
 
     return HttpResponse('NG')

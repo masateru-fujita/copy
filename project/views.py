@@ -32,7 +32,6 @@ def editProject(request):
 
         # 詳細変更時
         if 'description' in request.GET:
-            print(request.GET)
             project.description = request.GET['description']
             project.save()
             return HttpResponse(project.description)

@@ -1,3 +1,42 @@
+// --------------------------------アクセス情報DB保存-------------------------------------
+var user_analysis_id;
+// csrf_tokenの取得
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+// Ajax通信を開始する
+var data = {
+    "video_relation_id": location.pathname.replace(/[^0-9]/g, ''),
+};
+ajaxRequest(set_user_analysis, data).done(function(result) {
+    user_analysis_id = result;
+}).fail(function(result){
+    console.log(result);
+});
+
+function dateFormat(date){
+    return date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+}
+
+// -----------------------------------------------------------------------------------------
+
 // 動画サイズ変更
 $(document).ready(function () {
     hsize = $(window).height();
@@ -36,6 +75,8 @@ function videoFrameEvent(){
         $('#frame-now').text(Math.ceil($('#main-video')[0].currentTime * fps));
         // 現在の再生場所変更
         $('#seekbar-now').css('left', ($('#main-video')[0].currentTime / $('#main-video')[0].duration) * 100 + "%");
+
+        $("#time-current").text(timeFormat($('#main-video')[0].currentTime));
 
         // タグ作成
         JSON.parse(json_tags).forEach(json_tag => {
@@ -117,6 +158,19 @@ videoClickEvent();
 
 function videoClickEvent(){
     $('.video-flex-box').children('.video').on("click", function () {
+        // Ajax通信を開始する
+        splitUrl = $(this).children('source').attr('src').split('/');
+        data = {
+            "action_time": $('#main-video')[0].currentTime,
+            "user_analysis_id": user_analysis_id,
+            "action_type": "switch",
+            "switch_video_id": splitUrl[splitUrl.length - 1].split('.')[0],
+        };
+        ajaxRequest(set_action_analysis, data).done(function(result){
+            console.log(result);
+        }).fail(function(result){
+            console.log(result);
+        });
         $(this)[0].muted = false;
         $('#main-video')[0].muted = true;
         $(this).before($('#main-video'));
@@ -126,7 +180,7 @@ function videoClickEvent(){
         $(this).off();
         // 動画の時間を切り替える
         $('#time-duration').text(timeFormat($(this)[0].duration));
-        $('#frame-total').text(Math.ceil($(this)[0].duration * fps));  
+        $('#frame-total').text(Math.ceil($(this)[0].duration * fps));
         videoEndedEvent();
         videoClickEvent();
     });
@@ -137,13 +191,13 @@ function videoClickEvent(){
 function createTags(json_tag){
     switch (json_tag['fields']['action_type']){
         case 'link':
-            var tag = createLinkTag(json_tag['fields']);
+            var tag = createLinkTag(json_tag);
             break;
         case 'popup':
-            var tag = createPopupTag(json_tag['fields']);
+            var tag = createPopupTag(json_tag);
             break;
         case 'story':
-            var tag = createStoryTag(json_tag['fields']);
+            var tag = createStoryTag(json_tag);
             break;
     }
     tag.attr('id', json_tag['pk']);
@@ -171,14 +225,26 @@ function createTags(json_tag){
 };
 
 // リンクタグ作成関数
-function createLinkTag(link_tag_fields){
+function createLinkTag(link_tag){
     var tag = $('<div></div>', {
         on: {
             click: function(event){
-                window.open(link_tag_fields['link_url'], '_blank');
+                window.open(link_tag['fields']['link_url'], '_blank');
                 if(is_playing){
                     switchPlayFlg();
                 }
+                // Ajax通信を開始する
+                data = {
+                    "action_time": $('#main-video')[0].currentTime,
+                    "user_analysis_id": user_analysis_id,
+                    "tag_id": link_tag['pk'],
+                    "action_type": "link",
+                };
+                ajaxRequest(set_action_analysis, data).done(function(result){
+                    console.log(result);
+                }).fail(function(result){
+                    console.log(result);
+                });
             }
         }
     });
@@ -186,13 +252,27 @@ function createLinkTag(link_tag_fields){
 };
 
 // ポップアップタグ作成関数
-function createPopupTag(link_tag_fields){
+var popup_analysis_id;
+function createPopupTag(link_tag){
     var tag = $('<div></div>', {
         on: {
             click: function(event){
-                $('.popup-img-field').attr('src', '/' + link_tag_fields['popup_img']);
-                $('.popup-text-field').text(link_tag_fields['popup_text']);
-                switch (link_tag_fields['popup_type']){
+                // Ajax通信を開始する
+                console.log(link_tag['pk'])
+                data = {
+                    "action_time": $('#main-video')[0].currentTime,
+                    "user_analysis_id": user_analysis_id,
+                    "tag_id": link_tag['pk'],
+                    "action_type": "popup",
+                };
+                ajaxRequest(set_action_analysis, data).done(function(result){
+                    popup_analysis_id = result;
+                }).fail(function(result){
+                    console.log(result);
+                });
+                $('.popup-img-field').attr('src', '/' + link_tag['fields']['popup_img']);
+                $('.popup-text-field').text(link_tag['fields']['popup_text']);
+                switch (link_tag['fields']['popup_type']){
                     case 'default':
                         $('.popup-img-field').css('display', 'block');
                         $('.popup-switch-field').css('display', 'flex');
@@ -210,14 +290,23 @@ function createPopupTag(link_tag_fields){
                 if($('.popup-btn-field').length){
                     $('.popup-btn-field').remove();
                 }
-                if((link_tag_fields['popup_btn_text'] != '') && (link_tag_fields['popup_btn_url'] != '')){
+                if((link_tag['fields']['popup_btn_text'] != '') && (link_tag['fields']['popup_btn_url'] != '')){
                     var popup_btn = $('<div></div>', {
                         class: "popup-btn-field",
-                        text: link_tag_fields['popup_btn_text'],
+                        text: link_tag['fields']['popup_btn_text'],
                         on: {
                             click: function(event){
-                                window.open(link_tag_fields['popup_btn_url'], '_blank');
-                            }
+                                window.open(link_tag['fields']['popup_btn_url'], '_blank');
+                                // Ajax通信を開始する
+                                data = {
+                                    "popup_analysis_id": popup_analysis_id,
+                                };
+                                ajaxRequest(set_popup_action_btn, data).done(function(result){
+                                    popup_analysis_id = result;
+                                }).fail(function(result){
+                                    console.log(result);
+                                });
+                            },
                         }
                     });
                     $('.popup-field').append(popup_btn);
@@ -242,7 +331,7 @@ $('#endtag-close-btn').on('click', function(e) {
 });
 
 // storyタグ作成関数
-function createStoryTag(link_tag_fields){
+function createStoryTag(link_tag){
     var tag = $('<div></div>', {
         on: {
             click: function(event){
@@ -250,7 +339,7 @@ function createStoryTag(link_tag_fields){
                 $.ajax({
                     url: next_video_url,
                     method: "GET",
-                    data: {"next_video": link_tag_fields["story_next_video"]}
+                    data: {"next_video": link_tag['fields']["story_next_video"]}
                 })
                 .then(
                     // 1つめは通信成功時のコールバック
@@ -291,7 +380,7 @@ function createStoryTag(link_tag_fields){
                         $('#main-video').onloadedmetadata = function(){
                             $("#time-duration").text(timeFormat($('#main-video')[0].duration));
                             $("#frame-total").text(Math.ceil($('#main-video')[0].duration * fps));
-                            $('#main-video')[0].currentTime = $('#main-video')[0].duration * (link_tag_fields['story_start_flame'] / ($('#main-video')[0].duration * fps));
+                            $('#main-video')[0].currentTime = $('#main-video')[0].duration * (link_tag['fields']['story_start_flame'] / ($('#main-video')[0].duration * fps));
                         };
                         is_playing = true;
                         $('.video').each(function(index, element){
@@ -318,55 +407,16 @@ function createStoryTag(link_tag_fields){
     return tag;
 };
 
-// csrf_tokenの取得
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+function ajaxRequest(url, data){
+    // Ajax通信を開始する
+    return $.ajax({
+        url: url,
+        method: "POST",
+        data: data,
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
             }
-        }
-    }
-    return cookieValue;
+        },
+    })
 }
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-// Ajax通信を開始する
-date = new Date();
-aaa = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate();
-bbb = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-hoge = String(aaa + ' ' + bbb);
-console.log(hoge);
-$.ajax({
-    url: set_user_analysis,
-    method: "POST",
-    data: {
-        "video_relation_id": location.pathname.replace(/[^0-9]/g, ''),
-        "access_time": hoge,
-        "leave_time": hoge,
-        "start_time": hoge,
-        "end_time": hoge,
-    },
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
-        }
-    },
-})
-.then(
-    // 1つめは通信成功時のコールバック
-    function (data) {
-        console.log(data);
-    },
-    // 2つめは通信失敗時のコールバック
-    function () {
-        console.log("読み込み失敗");
-    }
-);

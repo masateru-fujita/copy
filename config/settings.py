@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '&gm%asaqubqeda(gm!hwt&@51)6$7ekdj$36#xazy!nz7qeby*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Application definition
 
@@ -85,9 +85,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mil',
+        'NAME': 'copy',
         'USER': 'root',
-        'PASSWORD': 'cladmin',
+        'PASSWORD': '!Masa6273',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -132,28 +132,14 @@ STATIC_URL = '/static/'
 STATICFILES = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    '/workspace/mil/static/',
+    '/copy/static/',
 ]
 
 LOGIN_URL = 'main:login' 
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-if DEBUG:
-    def show_toolbar(request):
-        return True
-
-    INSTALLED_APPS += (
-        'debug_toolbar',
-    )
-    MIDDLEWARE += (
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
-    DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': show_toolbar,
-    }
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
 
 LOGGING = {
     'version': 1,

@@ -153,3 +153,6 @@ dmypy.json
 
 # videos
 static/videos/
+
+#settings.py
+config/settings.py

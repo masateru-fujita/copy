@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '&gm%asaqubqeda(gm!hwt&@51)6$7ekdj$36#xazy!nz7qeby*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Application definition
 
@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'rest_framework',
     'bootstrap4',
     'main',
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'middleware.middleware.LoginRequiredMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -85,9 +87,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'copy',
+        'NAME': 'mil',
         'USER': 'root',
-        'PASSWORD': '!Masa6273',
+        'PASSWORD': 'cladmin',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -129,13 +131,27 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+<<<<<<< HEAD
 STATIC_ROOT = 'static'
+=======
+STATICFILES = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    '/workspace/mil/static/',
+]
+>>>>>>> 3e6dfd6417375c421107e667489f592f02cd2aca
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TEMPLATE_CONTEXT': True,
+}
+
+INTERNAL_IPS = ('127.0.0.1')
 
 LOGIN_URL = 'main:login' 
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
+ALLOWED_HOSTS = []
 
 LOGGING = {
     'version': 1,

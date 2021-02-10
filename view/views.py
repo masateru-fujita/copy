@@ -6,7 +6,7 @@ from video.models import VideoRelation, Video, LinkTag, EndTag
 from django.core import serializers
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.utils.decorators import method_decorator
-from django.utils.timezone import make_aware
+from django.utils import timezone
 
 import json
 import secrets
@@ -60,8 +60,6 @@ def setUserAnalysis(request):
         userAnalysis.video_relation = VideoRelation.objects.get(pk=request.POST.get('video_relation_id'))
         userAnalysis.save()
 
-        print(userAnalysis.pk)
-
         return HttpResponse(userAnalysis.pk)
 
     return HttpResponse('NG')
@@ -72,7 +70,7 @@ def setActionAnalysis(request):
     if request.method == 'POST':
         actionAnalysis = ActionAnalysis()
         actionAnalysis.user_analysis = UserAnalysis.objects.get(pk=request.POST.get('user_analysis_id'))
-        if(request.POST.get('action_type') != 'switch'):
+        if((request.POST.get('action_type') != 'switch') and (request.POST.get('action_type') != 'story_back')):
             actionAnalysis.tag = LinkTag.objects.get(pk=request.POST.get('tag_id'))
         actionAnalysis.action_type = request.POST.get('action_type')
         actionAnalysis.action_time = str(datetime.timedelta(seconds=float(request.POST.get('action_time'))))
@@ -93,10 +91,47 @@ def setActionAnalysis(request):
 
 # POPUPボタン押下イベント時
 @xframe_options_exempt
-def setPopupActionBtn(request):
+def setPopupFlg(request):
     if request.method == 'POST':
         actionAnalysis = ActionAnalysis.objects.get(pk=request.POST.get('popup_analysis_id'))
         actionAnalysis.popup_btn_flg = True
+        actionAnalysis.save()
+
+        return HttpResponse(actionAnalysis.pk)
+
+    return HttpResponse('NG')
+
+# 動画再生イベント
+@xframe_options_exempt
+def setStartTime(request):
+    if request.method == 'POST':
+        userAnalysis = UserAnalysis.objects.get(pk=request.POST.get('user_analysis_id'))
+        userAnalysis.start_time = timezone.datetime.now()
+        userAnalysis.save()
+
+        return HttpResponse(userAnalysis.pk)
+
+    return HttpResponse('NG')
+
+# ページ離脱時イベント時
+@xframe_options_exempt
+def setLeaveTime(request):
+    if request.method == 'POST':
+        userAnalysis = UserAnalysis.objects.get(pk=request.POST.get('user_analysis_id'))
+        userAnalysis.leave_time = timezone.datetime.now()
+        userAnalysis.end_time = str(datetime.timedelta(seconds=float(request.POST.get('end_time'))))
+        userAnalysis.save()
+
+        return HttpResponse(userAnalysis.pk)
+
+    return HttpResponse('NG')
+
+# ストーリー終了時間格納メソッド
+@xframe_options_exempt
+def setStoryEndTime(request):
+    if request.method == 'POST':
+        actionAnalysis = ActionAnalysis.objects.get(pk=request.POST.get('story_analysis_id'))
+        actionAnalysis.story_end_time = str(datetime.timedelta(seconds=float(request.POST.get('story_end_time'))))
         actionAnalysis.save()
 
         return HttpResponse(actionAnalysis.pk)

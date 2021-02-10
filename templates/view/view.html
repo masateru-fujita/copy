@@ -39,6 +39,7 @@
                 </div>
                 <button id="popup-close-btn"><img src="{% static 'images/video/' %}close-icon.png"></button>
             </div>
+            <button id="story-back-btn"><img src="{% static 'images/video/' %}back_btn.png"></button>
             <div class="endtag-field">
                 <p class="endtag-title"></p>
                 <p class="endtag-content"></p>
@@ -65,10 +66,14 @@
         </div>
     </div>
 <script type="text/javascript">
+    var before_video_ids = [{{ videos.0.video_relation.pk }}];
     var next_video_url = "{% url 'view:get_next_video' %}";
     var set_user_analysis = "{% url 'view:set_user_analysis' %}";
     var set_action_analysis = "{% url 'view:set_action_analysis' %}";
-    var set_popup_action_btn = "{% url 'view:set_popup_action_btn' %}";
+    var set_popup_flg = "{% url 'view:set_popup_flg' %}";
+    var set_start_time = "{% url 'view:set_start_time' %}";
+    var set_leave_time = "{% url 'view:set_leave_time' %}";
+    var set_story_end_time = "{% url 'view:set_story_end_time' %}";
     var json_tags = "{{ link_tags_json|escapejs }}";
     var end_tag = "{{ end_tag_json|escapejs }}";
 </script>

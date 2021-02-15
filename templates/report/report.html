@@ -1,0 +1,27 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/report.css' %}">
+{% endblock %}
+{% block content %}
+<div class="report-wrap">
+    <div class="report-content">
+        <input type="checkbox" checked>トータル
+        <input type="checkbox">ユニーク
+        <div>
+            総表示回数:
+            総視聴回数
+            総再生時間
+            視聴率
+            平均再生時間
+            タグクリック数
+            タグクリック率
+        </div>
+    </div>
+    <div class="project-list">
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/report.js' %}"></script>
+{% endblock %}

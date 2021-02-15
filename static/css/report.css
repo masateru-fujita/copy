@@ -1,0 +1,35 @@
+.report-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.report-content {
+    width: calc(100% - 300px);
+}
+
+.project-list{
+    width: 300px;
+    background-color: #8497B0;
+    color: white;
+}
+
+.videorelation-box {
+    margin-left: 10px;
+}
+
+.tag-box {
+    margin-left: 10px;
+}
+
+ul > li {
+    cursor: pointer;
+}
+
+.project {
+    margin: 10px;
+}
+
+.project:nth-of-type(n+2) {
+    border-top: 2px solid;
+}

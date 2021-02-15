@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'project',
     'video',
     'view',
+    'report',
 ]
 
 MIDDLEWARE = [

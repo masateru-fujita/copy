@@ -11,7 +11,6 @@ from config import settings
 from django.core import serializers
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.db.models import Q
-from .serializers import MyJsonEncoder
 
 import ffmpeg
 import subprocess

@@ -4,28 +4,31 @@ body, html {
 
 #wrapper {
     width: 100%;
-    height: 100%;
     margin: 0px auto;
-}
-
-header, footer {
-    height: 6%;
-    color: black;
     position: relative;
+    padding-bottom: 6vh;
+    box-sizing: border-box;
 }
 
 header {
     background-color: #A9D8FF;
+    height: 6vh;
+    color: black;
+    position: relative;
 }
 
 footer {
+    height: 6vh;
+    width: 100%;
+    color: black;
     background-color: #DEE7F7;
+    position: absolute;
     bottom: 0;
 }
 
 #contents {
-    height: 88%;
     background-color: #F4F6F9;
+    min-height: 88vh;
 }
 
 h1 {
@@ -198,14 +201,14 @@ nav > a:hover {
 .bg-circle-10 {
     width: 8%;
     position: absolute;
-    bottom: 6%;
+    bottom: 0%;
     right: 8%;
 }
 .bg-circle-10-in {
     background-color: #D9E0E5;
     width: 100%;
-    padding-top: 50%;
-    border-radius: 50% / 100% 100% 0 0;
+    padding-top: 100%;
+    border-radius: 100%;
 }
 
 /* パンくずリスト */

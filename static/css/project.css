@@ -6,7 +6,7 @@
 /* サイドメニュー（追加フォーム） */
 .display-form-btn {
     width: 50px;
-    height: 12%;
+    height: 12vh;
     position: absolute;
     top: 4%;
     right: 0;

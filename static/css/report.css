@@ -138,3 +138,36 @@ ul > li {
     border-top: 5px solid white;
     content: "";
 }
+
+#chart-access-count:checked + label {
+    background-color: #CCC;
+    font-weight: bold;
+}
+#chart-action-count:checked + label {
+    background-color: rgba(254,97,132,0.8);
+    font-weight: bold;
+}
+#chart-link-count:checked + label {
+    background-color: rgba(255,255,0,0.8);
+    font-weight: bold;
+}
+#chart-popup-count:checked + label {
+    background-color: rgba(255,0,255,0.8);
+    font-weight: bold;
+}
+#chart-popup-btn-count:checked + label {
+    background-color: rgba(126,255,43,0.8);
+    font-weight: bold;
+}
+#chart-story-count:checked + label {
+    background-color: rgba(0,255,255,0.8);
+    font-weight: bold;
+}
+#chart-storyback-count:checked + label {
+    background-color: rgba(56,43,76,0.8);
+    font-weight: bold;
+}
+#chart-switch-count:checked + label {
+    background-color: rgba(121,8,216,0.8);
+    font-weight: bold;
+}

@@ -1,11 +1,22 @@
 // -------------------------------------------Chart.js-----------------------------------------------------
+
+// チャートに表示するラベル名定義
+const access_label = "アクセス回数";
+const action_label = "アクション回数";
+const link_label = "リンクタグクリック回数";
+const popup_label = "ポップアップクリック回数";
+const popup_btn_label = "ポップアップボタンクリック回数";
+const story_label = "ストーリー遷移回数";
+const story_back_label = "ストーリー戻り回数";
+const switch_label = "スイッチ回数";
+
 var analysis_data = null;
 // ラベル作成（一旦一日）
 var label_data = [];
 var base_date = new Date();
 // 一週間は6で
-base_date.setDate(base_date.getDate() - 0);
-for (let index = 0; index < 1; index++) {
+base_date.setDate(base_date.getDate() - 6);
+for (let index = 0; index <= 6; index++) {
     for (let time_index = 0; time_index <= 23; time_index++) {
         var time_label = new Date(base_date.getFullYear(), base_date.getMonth(), base_date.getDate(), time_index, 0, 0);
         label_data.push(time_label);
@@ -22,6 +33,16 @@ var main_chart = new Chart($('#main-chart'), {
         ]
     },
     options: {
+        tooltips: {
+            mode: 'index',
+            axis: 'y',
+            callbacks : {
+                title: function(tooltipItems) {
+                    var date = new Date(tooltipItems[0].label);
+                    return date.getFullYear() + '年' + date.getMonth() + '月' + date.getDate() + '日' + date.getHours() + '時';
+                }
+            }
+        },
         scales: {
             xAxes: [{
                 gridLines: {
@@ -50,7 +71,8 @@ var main_chart = new Chart($('#main-chart'), {
     },
 });
 
-// chartに設定するアクセスデータ作成関数
+// ----------------------------------チェックボックス変更時関数
+// chartに設定するデータ作成関数
 function createChartData(func){
     var data = [];
     for (let label_index = 0; label_index < label_data.length - 1; label_index++) {
@@ -59,13 +81,12 @@ function createChartData(func){
         // 比較する2番目の要素作成
         second_datetime = label_data[label_index + 1];
         
-        // analysisのアクセス時間取得
+        // analysisのカウント追加
         data.push(func(start_datetime, second_datetime));
     }
     return data;
 }
 
-// ----------------------------------チェックボックス変更時関数
 // チャートに追加関数
 function addChart(data){
     main_chart.data.datasets.push(data);
@@ -84,286 +105,309 @@ function deleteChart(label){
 
 // アクセス回数チェックボックス変更時
 $('#chart-access-count').change(function() {
-    var label_name = "アクセス回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    count = count + 1;
-                }
-            });
-            return count;
-        });
+        var data = createChartData(accessChartFunc);
         var chart_data = {
             type: 'bar',
             data: data,
-            label: label_name,
+            label: access_label,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(access_label);
     }
 });
 
+// アクセス回数計算関数
+function accessChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            count = count + 1;
+        }
+    });
+    return count;
+}
+
 // アクション回数チェックボックス変更時
 $('#chart-action-count').change(function() {
-    var label_name = "アクション回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    count = count + target.actionAnalysis.length;
-                }
-            });
-            return count;
-        });
+        var data = createChartData(actionChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: action_label,
             borderColor : "rgba(254,97,132,0.8)",
             pointBackgroundColor : "rgba(254,97,132,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(action_label);
     }
 });
 
+function actionChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            count = count + target.actionAnalysis.length;
+        }
+    });
+    return count;
+}
+
 // リンクタグクリック回数チェックボックス変更時
 $('#chart-link-count').change(function() {
-    var label_name = "リンクタグクリック回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.action_type == 'link'){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(linkChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: link_label,
             borderColor : "rgba(255,255,0,0.8)",
             pointBackgroundColor : "rgba(255,255,0,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(link_label);
     }
 });
 
+function linkChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.action_type == 'link'){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
+
 // ポップアップタグクリック回数チェックボックス変更時
 $('#chart-popup-count').change(function() {
-    var label_name = "ポップアップタグクリック回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.action_type == 'popup'){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(popupChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: popup_label,
             borderColor : "rgba(255,0,255,0.8)",
             pointBackgroundColor : "rgba(255,0,255,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(popup_label);
     }
 });
 
+function popupChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.action_type == 'popup'){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
+
 // ポップアップボタンクリック回数チェックボックス変更時
 $('#chart-popup-btn-count').change(function() {
-    var label_name = "ポップアップボタンクリック回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.popup_btn_flg == true){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(popupbtnChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: popup_btn_label,
             borderColor : "rgba(126,255,43,0.8)",
             pointBackgroundColor : "rgba(0,255,255,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(popup_btn_label);
     }
 });
 
+function popupbtnChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.popup_btn_flg == true){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
+
 // ストーリータグクリック回数チェックボックス変更時
 $('#chart-story-count').change(function() {
-    var label_name = "ストーリータグクリック回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.action_type == 'story'){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(storyChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: story_label,
             borderColor : "rgba(0,255,255,0.8)",
             pointBackgroundColor : "rgba(0,255,255,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(story_label);
     }
 });
 
+function storyChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.action_type == 'story'){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
+
 // ストーリー戻り回数チェックボックス変更時
 $('#chart-storyback-count').change(function() {
-    var label_name = "ストーリー戻り回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.action_type == 'story_back'){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(storybackChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: story_back_label,
             borderColor : "rgba(56,43,76,0.8)",
             pointBackgroundColor : "rgba(56,43,76,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(story_back_label);
     }
 });
 
+function storybackChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.action_type == 'story_back'){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
+
 // スイッチング回数チェックボックス変更時
 $('#chart-switch-count').change(function() {
-    var label_name = "スイッチング回数";
     if($(this).prop('checked')){
-        var data = createChartData(function(start_datetime, second_datetime){
-            var count = 0;
-            analysis_data.forEach(target => {
-                // アクセス回数分ループ
-                if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
-                    // アクションが行われているか判定
-                    if(target.actionAnalysis.length){
-                        target.actionAnalysis.forEach(action => {
-                            if(action.action_type == 'switch'){
-                                count = count + 1;
-                            }
-                        })
-                    }
-                }
-            });
-            return count;
-        });
+        var data = createChartData(switchChartFunc);
         var chart_data = {
             type: 'line',
             data: data,
-            label: label_name,
+            label: switch_label,
             borderColor : "rgba(121,8,216,0.8)",
             pointBackgroundColor : "rgba(56,43,76,0.8)",
             fill: false,
             pointRadius: 0.1,
             borderWidth: 1.5,
+            lineTension: 0,
+            pointHitRadius: 15,
         };
         addChart(chart_data);
     }
     else{
-        deleteChart(label_name);
+        deleteChart(switch_label);
     }
 });
+
+function switchChartFunc(start_datetime, second_datetime){
+    var count = 0;
+    analysis_data.forEach(target => {
+        // アクセス回数分ループ
+        if(start_datetime < new Date(target.access_time) && new Date(target.access_time) <= second_datetime){
+            // アクションが行われているか判定
+            if(target.actionAnalysis.length){
+                target.actionAnalysis.forEach(action => {
+                    if(action.action_type == 'switch'){
+                        count = count + 1;
+                    }
+                })
+            }
+        }
+    });
+    return count;
+}
 
 // ----------------------------------------------------------★★★ドーナツテストだよユーザえーじぇんと★★★---------------------------------------------------------
 function createPieChart(labels, data, colors, element){
@@ -437,7 +481,7 @@ function createBrowserData(analysis){
 var view_rate = 5;
 
 // 分析データ取得
-ajaxRequest("get_analysis", null).done(function(result){
+ajaxRequest("get_analysis_all", null).done(function(result){
     // 総表示回数設定
     $('.display-count').text(result.length);
 
@@ -447,9 +491,11 @@ ajaxRequest("get_analysis", null).done(function(result){
 
     var action_count = 0;
 
+    var total_time = 0;
+
     // storyを含めた秒数計算
     result.forEach(userAnalysis => {
-        var total_time = TimeToNumber(userAnalysis.end_time);
+        total_time = total_time + TimeToNumber(userAnalysis.end_time);
         userAnalysis.actionAnalysis.forEach(action => {
             if(action.story_play_time != null){
                 total_time = total_time + TimeToNumber(action.story_play_time);
@@ -467,7 +513,7 @@ ajaxRequest("get_analysis", null).done(function(result){
 
     $('.view-count').text(view_count);
     $('.play-time').text(NumberToTime(all_time));
-    $('.view-rate').text(Math.floor((view_count / result.length) * 100) + '%');
+    $('.view-rate').text((view_count != 0) ? Math.floor((view_count / result.length) * 100) + '%': 0);
     $('.play-avg').text((all_time != 0) ? NumberToTime(all_time / view_count) : 0);
     $('.action-count').text(action_count);
     
@@ -500,6 +546,7 @@ ajaxRequest("get_analysis", null).done(function(result){
 
 // 時:分:秒.ミリ秒を秒数に変更
 function TimeToNumber(time){
+    console.log(time);
     var time_list = time.split(":");
     var total = (Number(time_list[0]) * 360) + (Number(time_list[1]) * 60) + Number(time_list[2]);
     return total;
@@ -539,8 +586,12 @@ $('input:checkbox').click(function() {
 });
 
 // ----------------------サイドバープロジェクト一覧作成-----------------------------
+$('.all-project').on("click", function(e){
+    setFilterAnalysis();
+});
+
 // 右のProject一覧作成（ネストしまくりで再起呼び出ししたいけどVideoにタグがついているためできない、なんかやり方あるかも）
-ajaxRequest("get_projects", null).done(function(result){
+ajaxRequest("get_project_list", null).done(function(result){
     // プロジェクト一覧ループ
     if(result.length){
         // project親Element作成
@@ -582,17 +633,25 @@ ajaxRequest("get_projects", null).done(function(result){
                             e.stopPropagation();
                         });
                     }
+                    videorelation_element.on("click", function(e){
+                        setFilterAnalysis('videorelation', videorelation.id);
+                    });
 
                     $(videorelation_box).append(videorelation_element);
                 });
         
                 $(project_element).append(videorelation_box);
                 videorelation_box.hide();
+                // ビデオリレーション表示イベント付与
                 project_element.on("click", function(e){
                     $(this).children("ul").toggle(200);
                 });
             }
 
+            // Analysisデータ取得
+            project_element.on("click", function(e){
+                setFilterAnalysis('project', project.id);
+            });
             $(project_box).append(project_element);
         });
 
@@ -601,7 +660,6 @@ ajaxRequest("get_projects", null).done(function(result){
     // 子要素のあるリストにクリックイベント付与
     $('.tri').on("click", function(e){
         $(this).toggleClass('tri-clicked');
-        console.log('hogehogeohge');
     });
 }).fail(function(result){
     console.log(result.statusText);
@@ -618,6 +676,65 @@ function createLiElements(className, text){
     return $('<li></li>', {
         "class": className,
         "text": text,
+    });
+}
+
+// サイドバークリック時紐づくanalysis取得
+function setFilterAnalysis(section = null, id = null){
+    var url = "";
+    switch (section) {
+        case 'project':
+            url = "get_project_analysis/" + id;
+            break;
+    
+        case 'videorelation':
+            url = "get_videorelation_analysis/" + id;
+            break;
+        
+        default:
+            url = "get_analysis_all";
+            break;
+    }
+    if(url != ""){
+        ajaxRequest(url, null).done(function(result){
+            analysis_data = result;
+            if($('#chart-access-count').prop('checked')){
+                changeChartData(access_label, createChartData(accessChartFunc));
+            }
+            if($('#chart-action-count').prop('checked')){
+                changeChartData(action_label, createChartData(actionChartFunc));
+            }
+            if($('#chart-link-count').prop('checked')){
+                changeChartData(link_label, createChartData(linkChartFunc));
+            }
+            if($('#chart-popup-count').prop('checked')){
+                changeChartData(popup_label, createChartData(popupChartFunc));
+            }
+            if($('#chart-popup-btn-count').prop('checked')){
+                changeChartData(popup_btn_label, createChartData(popupbtnChartFunc));
+            }
+            if($('#chart-story-count').prop('checked')){
+                changeChartData(story_label, createChartData(storyChartFunc));
+            }
+            if($('#chart-storyback-count').prop('checked')){
+                changeChartData(story_back_label, createChartData(storybackChartFunc));
+            }
+            if($('#chart-switch-count').prop('checked')){
+                changeChartData(switch_label, createChartData(switchChartFunc));
+            }
+            main_chart.update();
+        }).fail(function(result){
+            console.log(result.statusText);
+        });
+    }
+}
+
+// ラベル名が一致するデータ変更
+function changeChartData(label_name, target_data){
+    main_chart.data.datasets.forEach(function(data, index){
+        if(data.label == label_name){
+            main_chart.data.datasets[index].data = target_data;
+        }
     });
 }
 // ---------------------------------------------------

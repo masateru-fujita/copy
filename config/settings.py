@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
+    #'debug_toolbar',
     'rest_framework',
     'bootstrap4',
     'main',
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'middleware.middleware.LoginRequiredMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mil',
+        'NAME': 'copy',
         'USER': 'root',
-        'PASSWORD': 'cladmin',
+        'PASSWORD': '!Masa6273',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -132,11 +132,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+<<<<<<< HEAD
+STATIC_ROOT = 'static'
+=======
 STATICFILES = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
     '/workspace/mil/static/',
 ]
+>>>>>>> 7fb74f6268bd1facca736147fc41f2dee3a9082a
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,
@@ -148,7 +152,7 @@ LOGIN_URL = 'main:login'
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
 
 LOGGING = {
     'version': 1,

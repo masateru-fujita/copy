@@ -1,6 +1,6 @@
 .flex-wrap {
     display: flex;
-    height: calc(100% - 48px);
+    height: calc(88vh - 48px);
     position: relative;
 }
 

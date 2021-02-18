@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'project',
     'video',
     'view',
+    'report',
 ]
 
 MIDDLEWARE = [
@@ -131,7 +132,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+<<<<<<< HEAD
 STATIC_ROOT = 'static'
+=======
+STATICFILES = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    '/workspace/mil/static/',
+]
+>>>>>>> 7fb74f6268bd1facca736147fc41f2dee3a9082a
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,

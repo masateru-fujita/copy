@@ -1,0 +1,83 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/report.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="report-wrap">
+    <div class="report-content">
+        <div class="display_type">
+            <input type="checkbox" id="total" checked>
+            <label for="total">トータル</label>
+            <input type="checkbox" id="unique">
+            <label for="unique">ユニーク</label>
+        </div>
+        <div class="report-count">
+            <div>
+                <p>総表示回数</p>
+                <p class="display-count"></p>
+            </div>
+            <div>
+                <p>総視聴回数</p>
+                <p class="view-count"></p>
+            </div>
+            <div>
+                <p>総再生時間</p>
+                <p class="play-time"></p>
+            </div>
+            <div>
+                <p>視聴率</p>
+                <p class="view-rate"></p>
+            </div>
+            <div>
+                <p>平均再生時間</p>
+                <p class="play-avg"></p>
+            </div>
+            <div>
+                <p>アクション数</p>
+                <p class="action-count"></p>
+            </div>
+        </div>
+        <div class="chart">
+            <div class="chart-data-btn">
+                <input type="checkbox" id="chart-access-count">
+                <label for="chart-access-count">アクセス回数</label>
+                <input type="checkbox" id="chart-action-count">
+                <label for="chart-action-count">アクション回数</label>
+                <input type="checkbox" id="chart-link-count">
+                <label for="chart-link-count">リンクタグクリック回数</label>
+                <input type="checkbox" id="chart-popup-count">
+                <label for="chart-popup-count">ポップアップクリック回数</label>
+                <input type="checkbox" id="chart-popup-btn-count">
+                <label for="chart-popup-btn-count">ポップアップボタンクリック回数</label>
+                <input type="checkbox" id="chart-story-count">
+                <label for="chart-story-count">ストーリー遷移回数</label>
+                <input type="checkbox" id="chart-storyback-count">
+                <label for="chart-storyback-count">ストーリー戻り回数</label>
+                <input type="checkbox" id="chart-switch-count">
+                <label for="chart-switch-count">スイッチ回数</label>
+            </div>
+            <div class="mix-chart">
+                <canvas id="main-chart"></canvas>
+            </div>
+            <div class="pie-chart">
+                <div>
+                    <canvas id="terminal-chart"></canvas>
+                </div>
+                <div>
+                    <canvas id="browser-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="project-list">
+    <ul>
+        <li class="all-project">全プロジェクト</li>
+    </ul>
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/report.js' %}"></script>
+{% endblock %}

@@ -2,10 +2,11 @@ from django.db import models
 from django.utils import timezone
 from project.models import Project
 from config import settings
-from django.forms.models import model_to_dict
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save
+
 import os
+import json
 
 def get_upload_to(instance, filename):
     root, ext = os.path.splitext(filename)

@@ -27,7 +27,7 @@ class ActionAnalysis(models.Model):
     popup_btn_flg = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user_analysis)
+        return str(self.action_type)
 
     class Meta:
         db_table = 'ActionAnalysis'

@@ -49,15 +49,7 @@ class ActionAnalysisSerializer(serializers.ModelSerializer):
         try:
             story_start_flame = LinkTag.objects.get(pk=obj.tag.pk).story_start_flame
             start_time = int(story_start_flame) / 30
-            print('start_time')
-            print(start_time)
-            print('obj.story_end_time')
-            print(obj.story_end_time)
-            print('obj.pk')
-            print(obj.pk)
             story_play_time_abstruct_contents = datetime.datetime.combine(datetime.date.today(), obj.story_end_time) - datetime.timedelta(seconds=start_time)
-            print('story_play_time_abstruct_contents')
-            print(story_play_time_abstruct_contents)
             return story_play_time_abstruct_contents.strftime("%H:%M:%S.%f")
         except:
             story_play_time_abstruct_contents = None

@@ -546,7 +546,6 @@ ajaxRequest("get_analysis_all", null).done(function(result){
 
 // 時:分:秒.ミリ秒を秒数に変更
 function TimeToNumber(time){
-    console.log(time);
     var time_list = time.split(":");
     var total = (Number(time_list[0]) * 360) + (Number(time_list[1]) * 60) + Number(time_list[2]);
     return total;

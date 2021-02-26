@@ -54,7 +54,7 @@ var main_chart = new Chart($('#main-chart'), {
                         return (value.getHours() == 0 || value.getHours() == 12)
                             ? (value.getHours() == 12)
                                 ? value.getHours() + '時'
-                                : [value.getHours() + '時', formatDate(value)]
+                                : [value.getHours() + '時', value.getMonth() + '月' + value.getDate() + '日']
                             : '';
                     },
                     maxRotation: 0,
@@ -153,6 +153,7 @@ $('#chart-action-count').change(function() {
     }
 });
 
+// アクション回数チャート計算関数
 function actionChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -186,6 +187,7 @@ $('#chart-link-count').change(function() {
     }
 });
 
+// リンクタグクリック回数計算関数
 function linkChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -227,6 +229,7 @@ $('#chart-popup-count').change(function() {
     }
 });
 
+// ポップアップボタンクリック回数計算関数
 function popupChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -268,6 +271,7 @@ $('#chart-popup-btn-count').change(function() {
     }
 });
 
+// ポップアップボタンクリック回数計算関数
 function popupbtnChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -309,6 +313,7 @@ $('#chart-story-count').change(function() {
     }
 });
 
+// ストーリー遷移回数計算関数
 function storyChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -350,6 +355,7 @@ $('#chart-storyback-count').change(function() {
     }
 });
 
+//　ストーリー戻り回数計算関数
 function storybackChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -391,6 +397,7 @@ $('#chart-switch-count').change(function() {
     }
 });
 
+// スイッチ回数計算関数
 function switchChartFunc(start_datetime, second_datetime){
     var count = 0;
     analysis_data.forEach(target => {
@@ -514,10 +521,13 @@ ajaxRequest("get_analysis_all", null).done(function(result){
     $('.view-count').text(view_count);
     $('.play-time').text(NumberToTime(all_time));
     $('.view-rate').text((view_count != 0) ? Math.floor((view_count / result.length) * 100) + '%': 0);
+    // pythonの計算式でおかしくなってる
     $('.play-avg').text((all_time != 0) ? NumberToTime(all_time / view_count) : 0);
     $('.action-count').text(action_count);
     
     analysis_data = result;
+
+    createUserAnalysisTable();
 
     // ---------------★★★ドーナツテストだよユーザえーじぇんと★★-----------------
     var color = [
@@ -564,10 +574,13 @@ function NumberToTime(number){
 
 // 時間を時、分、秒にformat
 function formatDate(date){
-    // var y = date.getFullYear();
+    var y = date.getFullYear();
     var m = date.getMonth() + 1;
     var d = date.getDate();
-    return m + '月' + d + '日';
+    var h = date.getHours();
+    var M = date.getMinutes();
+    var s = date.getSeconds();
+    return y + '年' + m + '月' + d + '日' + h + '時' + M + '分' + s + '秒';
 }
 
 // Ajax通信関数
@@ -594,18 +607,18 @@ ajaxRequest("get_project_list", null).done(function(result){
     // プロジェクト一覧ループ
     if(result.length){
         // project親Element作成
-        var project_box = createUlElement("project-box");
+        var project_box = $('<ul class="project-box"></ul>');
         result.forEach(project => {
             // projectElement作成
-            var project_element = createLiElements("project", project.title);
+            var project_element = $(`<li class="project">${project.title}</li>`);
 
             if(project.videorelations.length){
                 project_element.addClass('tri');
                 // videorelation親Element作成
-                var videorelation_box = createUlElement("videorelation-box");
+                var videorelation_box = $('<ul class="videorelation-box"></ul>');
                 project.videorelations.forEach(videorelation => {
                     // videorelationElement作成
-                    var videorelation_element = createLiElements("videorelation", videorelation.title);
+                    var videorelation_element = $(`<li class="videorelation">${videorelation.title}</li>`);
 
                     if(videorelation.videos.length){
                         videorelation.videos.forEach(videos => {
@@ -613,10 +626,10 @@ ajaxRequest("get_project_list", null).done(function(result){
                             if(videos.linktags.length){
                                 videorelation_element.addClass('tri');
                                 // tag親element作成
-                                var tag_box = createUlElement("tag-box");
+                                var tag_box = $('<ul class="tag-box"></ul>');
                                 videos.linktags.forEach(tag => {
                                     // tagElement作成
-                                    var tag_element = createLiElements("tag", tag.title);
+                                    var tag_element = $(`<li class="tag">${tag.title}</li>`);
                                     $(tag_box).append(tag_element);
                                     tag_element.on("click", function(e){
                                         e.stopPropagation();
@@ -664,20 +677,6 @@ ajaxRequest("get_project_list", null).done(function(result){
     console.log(result.statusText);
 });
 
-// 右のプロジェクト一覧ul作成関数
-function createUlElement(className){
-    return $('<ul></ul>', {
-        "class": className,
-    });
-}
-// 右のプロジェクト一覧li作成関数
-function createLiElements(className, text){
-    return $('<li></li>', {
-        "class": className,
-        "text": text,
-    });
-}
-
 // サイドバークリック時紐づくanalysis取得
 function setFilterAnalysis(section = null, id = null){
     var url = "";
@@ -697,6 +696,7 @@ function setFilterAnalysis(section = null, id = null){
     if(url != ""){
         ajaxRequest(url, null).done(function(result){
             analysis_data = result;
+            // 各チャートチェックボックスがチェックされていればデータアップデート
             if($('#chart-access-count').prop('checked')){
                 changeChartData(access_label, createChartData(accessChartFunc));
             }
@@ -722,6 +722,8 @@ function setFilterAnalysis(section = null, id = null){
                 changeChartData(switch_label, createChartData(switchChartFunc));
             }
             main_chart.update();
+
+            createUserAnalysisTable();
         }).fail(function(result){
             console.log(result.statusText);
         });
@@ -737,3 +739,61 @@ function changeChartData(label_name, target_data){
     });
 }
 // ---------------------------------------------------
+
+// 1アクセスごとのanalysis作成
+function createUserAnalysisTable(){
+    if($('.analysis-row').length){
+        $('.analysis-row').remove();
+    }
+    if($('.action-box').length){
+        $('.action-box').remove();
+    }
+    analysis_data.forEach(function(analysis, index){
+        var analysis_row = $(`<div id="analysis-${index}" class="analysis-row"></div>`);
+        var index_ele = $(`<div></div>`);
+        var title_ele = $(`<div>${analysis.video_relation.title}</div>`);
+        var access_ele = $(`<div>${formatDate(new Date(analysis.access_time))}</div>`);
+        var leave_ele = $(`<div>${formatDate(new Date(analysis.leave_time))}</div>`);
+        var start_ele = $(`<div>${formatDate(new Date(analysis.start_time))}</div>`);
+        var end_time = TimeToNumber(analysis.end_time);
+        // 視聴時間取得
+        analysis.actionAnalysis.forEach(action => {
+            analysis_row.addClass('tri');
+            if(action.story_play_time != null){
+                end_time = end_time + TimeToNumber(action.story_play_time);
+            };
+        });
+        var end_ele = $(`<div>${NumberToTime(end_time)}</div>`);
+        analysis_row.append(index_ele, title_ele, access_ele, leave_ele, start_ele, end_ele);
+        $('#analysis-grid').append(analysis_row);
+
+        // アクション項目作成
+        if(analysis.actionAnalysis.length) {
+            // タイトル、詳細を含む要素
+            var action_box = $(`<div id="action-${index}" class="action-box"></div>`);
+            // タイトル要素
+            var title_wrap = $('<div class="action-row"></div>');
+            var title_dummy_ele = $('<div></div>');
+            var title_action_type = $('<div>アクション種別</div>');
+            var title_tag_name = $('<div>タグ名</div>');
+            var title_action_time = $('<div>アクション時間</div>');
+            title_wrap.append(title_dummy_ele, title_action_type, title_tag_name, title_action_time);
+            action_box.append(title_wrap);
+            // アクション詳細要素
+            analysis.actionAnalysis.forEach(function(action, index){
+                var action_wrap = $('<div class="action-row"></div>');
+                var index_ele = $(`<div></div>`);
+                var action_type =$(`<div>${action.action_type}</div>`);
+                var action_name =$(`<div>${(action.tag != null) ? action.tag.title : action.switch_video.id}</div>`);
+                var action_time =$(`<div>${action.action_time}</div>`);
+                action_wrap.append(index_ele, action_type, action_name, action_time);
+                action_box.append(action_wrap);
+            });
+            $('#analysis-grid').append(action_box);
+        }
+        // アクション詳細を隠しておき、analysisクリック時に表示
+        analysis_row.on("click", function(e){
+            $(`#${$(this).attr('id').replace('analysis', 'action')}`).toggle(200);
+        });
+    });
+}

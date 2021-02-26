@@ -37,11 +37,13 @@ class VideoCreateView(CreateView, generic.edit.ModelFormMixin):
                 video_relation_form.instance.project_id = self.kwargs['pk']
                 video_relation_form.save()
                 videos = request.FILES.getlist('video')
+                three_dimensional_flgs = request.POST.getlist('three_dimensional_flg')
                 firstFlg = True
-                for video in videos:
+                for index, video in enumerate(videos):
                     video_add_form = VideoForm(** self.get_form_kwargs())
                     video_add_form.instance.video = video
                     video_add_form.instance.video_relation_id = video_relation_form.instance.id
+                    video_add_form.instance.three_dimensional_flg = False if(three_dimensional_flgs[index] == '0') else True
                     video_add_form.save()
                     if firstFlg:
                         make_video_thumb(
@@ -63,7 +65,7 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
     fields = ()
 
     def get_context_data(self, **kwargs):
-        kwargs['videos'] = Video.objects.filter(video_relation_id=self.kwargs['pk']).select_related('video_relation')
+        kwargs['videos'] = Video.objects.filter(video_relation_id=self.kwargs['pk'])
         kwargs['link_tags'] = LinkTag.objects.filter(video_id=kwargs['videos'][0].id)
         kwargs['relation'] = VideoRelation.objects.get(id=self.kwargs['pk'])
         kwargs['project'] = Project.objects.get(id=kwargs['relation'].project.pk)

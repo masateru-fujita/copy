@@ -25,6 +25,7 @@ class VideoRelation(models.Model):
 class Video(models.Model):
     video_relation = models.ForeignKey(VideoRelation, on_delete=models.CASCADE)
     video = models.FileField(upload_to=get_upload_to, null=True)
+    three_dimensional_flg = models.BooleanField(default=False)
     created_at = models.DateField(default=timezone.now)
 
     class Meta:

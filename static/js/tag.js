@@ -63,7 +63,7 @@ function createTags(link_tags){
 };
 
 function createLinkTagArea(element){
-    element.on('click', function() {
+    element.on('click', function(e) {
         $('.video').first().off('mousedown');
         $('.video').first().off('mousemove');
         $('.video').first().off('mouseup');
@@ -110,6 +110,7 @@ function createLinkTagArea(element){
         });
 
         $('.video').first().on('mousemove', function(e) {
+            e.stopPropagation();
             if(is_drowing){
                 canvas.style.width = (e.offsetX - start_x) + 'px';
                 canvas.style.height = (e.offsetY - start_y) + 'px';
@@ -287,56 +288,6 @@ function createStoryTag(link_tag){
             video.pause();
         });
         switchPlayFlg();
-
-        // Ajax通信を開始する
-        // $.ajax({
-        //     url: url_for_story,
-        //     method: "GET",
-        //     data: {"next_video": link_tag["fields"]["story_next_video"]}
-        // })
-        // .then(
-        //     // 1つめは通信成功時のコールバック
-        //     function (data) {
-        //         // JSONデータ解析
-        //         var all_data = JSON.parse(data)[0];
-                
-        //         // videoデータ解析
-        //         var video_data = JSON.parse(all_data["video"]);
-        //         video = $('.video').first();
-        //         video.attr('src', '/' + video_data[0]["fields"]['video']);
-
-        //         video.load();
-        //         // 次の時間計算
-        //         // video読み込み後
-        //         video.onloadedmetadata = function(){
-        //             document.getElementById("time-duration").innerHTML = timeFormat(video.duration);
-        //             document.getElementById("frame-total").innerHTML = Math.ceil(video.duration * fps);
-        //             video.currentTime = video.duration * (link_tag["fields"]['story_start_flame'] / (video.duration * fps));
-        //         };
-        //         video.play();
-        //         switchPlayFlg();
-
-        //         // link_tagデータ解析
-        //         obj_link_tags = JSON.parse(all_data["link_tag"]);
-        //         // 動画タグ情報を削除する
-        //         var removeChilds = Array.from(document.getElementsByClassName('link-tag'));
-        //         removeChilds.forEach(element => {
-        //             element.remove();
-        //         });
-        //         tag_elements = [];
-        //         createTags(obj_link_tags);
-
-        //         // end_tagデータ解析
-        //         var end_tag_data = JSON.parse(all_data["end_tag"]);
-        //         obj_end_tags = end_tag_data;
-
-        //         console.log("読み込み成功");
-        //     },
-        //     // 2つめは通信失敗時のコールバック
-        //     function () {
-        //         console.log("読み込み失敗");
-        //     }
-        // );
     });
 
     return tag;
@@ -528,6 +479,7 @@ function createSideTagEvent(link_tag){
     });
 };
 
+// プレビューボタン押下時
 $('#popup-preview-btn-general').on('click', function(e) {
     if($(this).parent().find('input[name="popup_img"]').val() == ''){
         $('.popup-img-field').attr('src', '/static/images/video/noimage.png');
@@ -693,14 +645,15 @@ function setPopupBtnEventFromLinkTag(link_tag, element){
 }
 
 // サブビデオクリック時
-videoClickEvent();
 function videoClickEvent(){
     $('#video-field').children('.video').prop('muted', false);
     $('.video-flex-box').children('.video').on("click", function () {
+        console.log('hgoehoge');
         $('#video-field').children('.video').prop('muted', true);
         $(this).before($('#video-field').children('.video'));
         $('#video-field').prepend($(this));
         $(this).off();
+        this.addEventListener( EVENT.TOUCH_START, onDocumentMouseDown, false );
         videoClickEvent();
     });
 }

@@ -31,6 +31,11 @@
                     </label>
                     <p class="file-name">選択されていません</p>
                 </div>
+                <div class="check-col">
+                    {{ form.three_dimensional_flg.errors }}
+                    <label class="three-dimensional-flg"><input type="checkbox" name="three_dimensional_flg" value="0" checked><span>通常</span></label>
+                    <label class="three-dimensional-flg"><input type="checkbox" name="three_dimensional_flg" value="1"><span>360度動画</span></label>
+                </div>
             </div>
             <button type="button" class="add-switching-video">スイッチング動画追加</button>
             <div class="btn-area">

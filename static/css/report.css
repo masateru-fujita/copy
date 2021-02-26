@@ -171,3 +171,80 @@ ul > li {
     background-color: rgba(121,8,216,0.8);
     font-weight: bold;
 }
+
+/* グリッドレイアウト（ユーザごとのアクセス、アクションレポート） */
+#analysis-grid {
+    margin: 10px auto;
+    width: 80%;
+    position: relative;
+}
+
+.analysis-title-row, .analysis-row, .action-row {
+    display: flex;
+}
+
+.analysis-title-row:nth-child(n + 2), .analysis-row:nth-child(n + 2), .action-row:nth-child(n + 2){
+    font-size: 90%;
+}
+
+.analysis-title-row > div:first-child, .analysis-row > div:first-child{
+    width: 3%;
+}
+.analysis-title-row > div:nth-child(2), .analysis-row > div:nth-child(2){
+    width: 12%;
+}
+.analysis-title-row > div:nth-child(3), .analysis-row > div:nth-child(3){
+    width: 25%;
+}
+.analysis-title-row > div:nth-child(4), .analysis-row > div:nth-child(4){
+    width: 25%;
+}
+.analysis-title-row > div:nth-child(5), .analysis-row > div:nth-child(5){
+    width: 25%;
+}
+.analysis-title-row > div:nth-child(6), .analysis-row > div:nth-child(6){
+    width: 10%;
+}
+
+.action-row > div:first-child{
+    width: 3%;
+}
+.action-row > div:nth-child(2){
+    width: 19%;
+}
+.action-row > div:nth-child(3){
+    width: 19%;
+}
+.action-row > div:nth-child(4){
+    width: 19%;
+}
+
+.action-box {
+    display: none;
+}
+
+#analysis-grid > .tri::before {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    transform: translateY(-50%);
+    width: 0px;
+    height: 0px;
+    border: 5px solid transparent;
+    border-left: 5px solid black;
+    content: "";
+}
+
+#analysis-grid > .tri-clicked::before{
+    transform: translateY(-20%);
+    border: 5px solid transparent;
+    border-top: 5px solid black;
+    content: "";
+}
+
+.action-row:first-child{
+    margin-top: 5px;
+}
+.action-row:last-child{
+    margin-bottom: 5px;
+}

@@ -179,3 +179,32 @@
 .edit-title {
     width: 110px;
 }
+
+/* 360度動画チェックボックス */
+#video_type {
+    margin-left: 20px;
+}
+
+.three-dimensional-flg {
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+.three-dimensional-flg input {
+    display: none; /* デフォルトのinputは非表示にする */
+}
+
+.three-dimensional-flg span {
+    background-color: white;
+    color: #002C50;
+    font-size: 90%;
+    width: 100px;
+    padding: 5px;
+    margin: 3px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.three-dimensional-flg input:checked + span {
+    background-color: #F8B500;
+}

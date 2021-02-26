@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'copy',
+        'NAME': 'mil',
         'USER': 'root',
-        'PASSWORD': '!Masa6273',
+        'PASSWORD': 'cladmin',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -148,7 +148,7 @@ LOGIN_URL = 'main:login'
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
+ALLOWED_HOSTS = []
 
 LOGGING = {
     'version': 1,

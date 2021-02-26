@@ -28,7 +28,7 @@
     max-width: 100%;
 }
 
-.video-flex-box > .video {
+.video-flex-box > .video, .video-flex-box > canvas {
     height: 100%;
     cursor: pointer;
 }

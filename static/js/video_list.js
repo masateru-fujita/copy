@@ -17,19 +17,38 @@ $('.file').on('change', function () {
     $(this).parent().parent().children('.file-name').text(file.name)
 });
 
+// 動画タイプ変更時イベント
+changeThreeDimensionalFlg();
+function changeThreeDimensionalFlg(){
+    $('input[name="three_dimensional_flg"]').change(function() {
+        if ($(this).prop('checked')){
+            $(this).parent().parent().find('input[name="three_dimensional_flg"]').prop('checked', false);
+            $(this).prop('checked', true);
+        }
+        else {
+            $(this).prop('checked', true);
+        }
+    });
+};
+
 // スイッチング動画追加ボタンイベント
 $('.add-switching-video').on('click', function () {
     var index = $('.file-col').length;
     var file_col = $('.file-col').last().clone();
     file_col.find('.file').val(null);
     file_col.find('.file').attr("id", 'sub-video' + index);
-    file_col.find('label').attr("for", 'sub-video' + index)
+    file_col.find('label').attr("for", 'sub-video' + index);
     file_col.children('.file-name').text('選択されていません');
     file_col.find('.file').on('change', function () {
         var file = $(this).prop('files')[0];
         $(this).parent().parent().children('p').text(file.name)
     });
-    $('.file-col').parent().append(file_col);
+    var three_dimensional_ele = $('.check-col').first().clone();
+    three_dimensional_ele.find('input[name="three_dimensional_flg"]').prop('checked', false);
+    three_dimensional_ele.find('input[name="three_dimensional_flg"]').first().prop('checked', true);
+    
+    $('.file-col').parent().append(file_col, three_dimensional_ele);
+    changeThreeDimensionalFlg();
 });
 
 addTransitionEvent();

@@ -2,10 +2,12 @@ from .models import UserAnalysis, ActionAnalysis
 from video.models import LinkTag
 from rest_framework.serializers import Field, SerializerMethodField
 from rest_framework import serializers
+from video.serializers import VideoRelationSerializer, VideoSerializer, LinkTagSerializer
 
 import datetime
 
 class UserAnalysisSerializer(serializers.ModelSerializer):
+    video_relation = VideoRelationSerializer()
     actionAnalysis = SerializerMethodField()
     class Meta:
         model = UserAnalysis
@@ -22,14 +24,16 @@ class UserAnalysisSerializer(serializers.ModelSerializer):
         ]
 
     def get_actionAnalysis(self, obj):
-        # try:
+        try:
             action_analysis_abstruct_contents = ActionAnalysisSerializer(ActionAnalysis.objects.all().filter(user_analysis = UserAnalysis.objects.get(id=obj.id)), many=True).data
             return action_analysis_abstruct_contents
-        # except:
-        #     action_analysis_abstruct_contents = None
-        #     return action_analysis_abstruct_contents
+        except:
+            action_analysis_abstruct_contents = None
+            return action_analysis_abstruct_contents
 
 class ActionAnalysisSerializer(serializers.ModelSerializer):
+    tag = LinkTagSerializer()
+    switch_video = VideoSerializer()
     story_play_time = SerializerMethodField()
     class Meta:
         model = ActionAnalysis

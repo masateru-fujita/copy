@@ -2,6 +2,7 @@
 {% load static %}
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/video.css' %}">
+<script type="text/javascript" src="{% static 'js/three.min.js' %}"></script>
 {% endblock %}
 {% block content %}
 <div class="breadcrumb">
@@ -18,7 +19,7 @@
         <div class="video-wrap">
             <div id="video-field">
                 {% for video in videos %}
-                    <video class="video" muted>
+                    <video id="{{ video.pk }}" class="video">
                         <source src="/{{ video.video }}">
                     </video>
                     {% if forloop.first %}
@@ -303,9 +304,14 @@
         var link_tags = "{{ link_tags_json|escapejs }}";
         var end_tags = "{{ end_tags_json|escapejs }}";
         var url_for_story = "{% url 'video:next_video' %}";
+        var three_dim_flgs = {};
+        {% for video in videos %}
+            three_dim_flgs["{{ video.pk }}"] = "{{ video.three_dimensional_flg }}";
+        {% endfor %}
     </script>
     <script type="text/javascript" src="{% static 'js/video.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/tag.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/popup.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/video_footer.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/three_dimensional.js' %}"></script>
 {% endblock %}

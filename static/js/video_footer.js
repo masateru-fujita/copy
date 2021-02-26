@@ -5,9 +5,9 @@ var seekbar_now = document.getElementById("seekbar-now");
 var footer_event;
 
 var fps = 30;
-var cameras = [];
-var renderers = [];
-var scenes = [];
+var three_dim_info = {};
+
+console.log(three_dim_flgs);
 
 // video読み込み後
 videos[0].onloadedmetadata = function(){
@@ -16,11 +16,12 @@ videos[0].onloadedmetadata = function(){
 
 	var elems = Array.from(document.getElementsByTagName('video'));
 	elems.forEach(function(x, index){
-		if(three_dim_flgs[x.id]){
-			var [cameraaaa, rendereraaa, sceneaaa] = createThreeDimVideo(x, index);
-			cameras.push(cameraaaa);
-			renderers.push(rendereraaa);
-			scenes.push(sceneaaa);
+		console.log(three_dim_flgs[x.id]);
+		if(three_dim_flgs[x.id] == 'True'){
+			console.log('hogehoge');
+			var [camera, renderer, scene, mouseDownEvent] =  createThreeDimVideo(x, index);
+			// Videoに紐づく3D情報格納
+			three_dim_info[x.id] = {"camera": camera, "renderer": renderer, "scene": scene, "mousedownevent": mouseDownEvent};
 		}
 	});
 	videoClickEvent();

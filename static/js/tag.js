@@ -648,12 +648,51 @@ function setPopupBtnEventFromLinkTag(link_tag, element){
 function videoClickEvent(){
     $('#video-field').children('.video').prop('muted', false);
     $('.video-flex-box').children('.video').on("click", function () {
-        console.log('hgoehoge');
+        var main_video_id = $('#video-field').children('.video').attr('id');
+        // クリックされた動画が360度動画ならマウスドラッグイベント付与
+        var video_width = $(this).width();
+        var video_height = $(this).height();
+        if(three_dim_flgs[$(this).attr('id')] == 'True'){
+            this.addEventListener(
+                EVENT.TOUCH_START,
+                three_dim_info[$(this).attr('id')]["mousedownevent"] = onDocumentMouseDown.bind(this, three_dim_info[$(this).attr('id')]["camera"]),
+                false );
+            
+            // 動画のサイズ、アスペクト比変更
+            var camera = three_dim_info[$(this).attr('id')]["camera"];
+            var renderer = three_dim_info[$(this).attr('id')]["renderer"];
+            // 動画のサイズ、アスペクト比変更
+            camera.aspect = $(`#${main_video_id}`).width() / $(`#${main_video_id}`).height();
+            camera.updateProjectionMatrix();
+            renderer.setSize( $(`#${main_video_id}`).width(), $(`#${main_video_id}`).height() );
+        }
+        // メインの動画が360度動画か
+        if(three_dim_flgs[main_video_id] == 'True'){
+            // マウスドラッグイベント削除
+            document.getElementById(main_video_id).removeEventListener(
+                EVENT.TOUCH_START,
+                three_dim_info[main_video_id]["mousedownevent"],
+                false );
+            // カメラのポジションを初期値に設定
+            var camera = three_dim_info[main_video_id]["camera"];
+            var renderer = three_dim_info[main_video_id]["renderer"];
+            var scene = three_dim_info[main_video_id]["scene"];
+            phi = THREE.Math.degToRad( 90 - 0 );
+            theta = THREE.Math.degToRad( 0 );
+            camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
+            camera.position.y = 100 * Math.cos( phi );
+            camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
+            camera.lookAt( 0, 0, 0 );
+            renderer.render( scene, camera );
+            // 動画のサイズ、アスペクト比変更
+            camera.aspect = video_width / video_height;
+            camera.updateProjectionMatrix();
+            renderer.setSize( video_width, video_height );
+        }
         $('#video-field').children('.video').prop('muted', true);
         $(this).before($('#video-field').children('.video'));
         $('#video-field').prepend($(this));
         $(this).off();
-        this.addEventListener( EVENT.TOUCH_START, onDocumentMouseDown, false );
         videoClickEvent();
     });
 }

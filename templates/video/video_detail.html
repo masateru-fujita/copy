@@ -19,7 +19,7 @@
         <div class="video-wrap">
             <div id="video-field">
                 {% for video in videos %}
-                    <video id="{{ video.pk }}" class="video">
+                    <video id="{{ video.pk }}" class="video" muted>
                         <source src="/{{ video.video }}">
                     </video>
                     {% if forloop.first %}

@@ -18,12 +18,15 @@ lon = 0, onMouseDownLon = 0,
 lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
+var mouseDownEvent
+var mouseMoveEvent;
+
 function createThreeDimVideo(elem, index){
 	var camera, scene, renderer, video, texture, container;
 
 	init();
 	tick();
-	return [camera, renderer, scene];
+	return [camera, renderer, scene, mouseDownEvent];
 
 	function init(){
 		// コンテナの準備
@@ -76,6 +79,7 @@ function createThreeDimVideo(elem, index){
 		renderer = new THREE.WebGLRenderer();
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( video.clientWidth, video.clientHeight );
+		renderer.domElement.setAttribute('id', elem.getAttribute('id'));
 		renderer.domElement.classList.add('video');
 		container.prepend( renderer.domElement );
 
@@ -83,7 +87,7 @@ function createThreeDimVideo(elem, index){
 
 		// 最初の要素にドラッグ・スワイプ操作を設定
 		if(index == 0){
-			renderer.domElement.addEventListener( EVENT.TOUCH_START, onDocumentMouseDown.bind(renderer.domElement, camera), false );
+			renderer.domElement.addEventListener( EVENT.TOUCH_START, mouseDownEvent = onDocumentMouseDown.bind(renderer.domElement, camera), false );
 		}
 
 		// 画面のリサイズに対応
@@ -100,8 +104,6 @@ function createThreeDimVideo(elem, index){
 		renderer.setAnimationLoop( tick );
 	}
 };
-
-var mouseMoveEvent;
 
 function onDocumentMouseDown( camera, event ) {
 	event.preventDefault();

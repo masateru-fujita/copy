@@ -205,5 +205,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'video': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     }
 }

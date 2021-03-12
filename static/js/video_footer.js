@@ -7,8 +7,6 @@ var footer_event;
 var fps = 30;
 var three_dim_info = {};
 
-console.log(three_dim_flgs);
-
 // video読み込み後
 videos[0].onloadedmetadata = function(){
 	document.getElementById("time-duration").innerHTML = timeFormat(videos[0].duration);
@@ -16,10 +14,8 @@ videos[0].onloadedmetadata = function(){
 
 	var elems = Array.from(document.getElementsByTagName('video'));
 	elems.forEach(function(x, index){
-		console.log(three_dim_flgs[x.id]);
-		if(three_dim_flgs[x.id] == 'True'){
-			console.log('hogehoge');
-			var [camera, renderer, scene, mouseDownEvent] =  createThreeDimVideo(x, index);
+		if(three_dim_flags[x.id] == 'True'){
+			var [camera, renderer, scene, mouseDownEvent, video] =  createThreeDimVideo(x, index);
 			// Videoに紐づく3D情報格納
 			three_dim_info[x.id] = {"camera": camera, "renderer": renderer, "scene": scene, "mousedownevent": mouseDownEvent};
 		}
@@ -45,14 +41,16 @@ video_btn.addEventListener('click', () => {
 
 			// タグ表示非表示切り替え
 			obj_link_tags.forEach(function(tag, index){
-				if(getComputedStyle(tag_elements[index]).getPropertyValue("visibility") == "hidden"
+				if($('.video').first().attr('id') == tag["fields"]["video"]
+					&& getComputedStyle(tag_elements[index]).getPropertyValue("visibility") == "hidden"
 					&& tag["fields"]['display_frame'] <= Math.ceil(videos[0].currentTime * fps)
 					&& tag["fields"]['hide_frame'] >= Math.ceil(videos[0].currentTime * fps)){
 						tag_elements[index].style.visibility = "visible";
 				}
-				else if(getComputedStyle(tag_elements[index]).getPropertyValue("visibility") == "visible"
+				else if(($('.video').first().attr('id') != tag["fields"]["video"])
+					|| (getComputedStyle(tag_elements[index]).getPropertyValue("visibility") == "visible"
 					&& (tag["fields"]['display_frame'] > Math.ceil(videos[0].currentTime * fps)
-					|| tag["fields"]['hide_frame'] < Math.ceil(videos[0].currentTime * fps))) {
+					|| tag["fields"]['hide_frame'] < Math.ceil(videos[0].currentTime * fps)))) {
 						tag_elements[index].style.visibility = "hidden";
 				}
 			});
@@ -63,7 +61,7 @@ video_btn.addEventListener('click', () => {
 
 	} else {
 		videos.forEach(video => {
-		video.pause();
+			video.pause();
 		});
 		switchPlayFlg();
 

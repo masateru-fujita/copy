@@ -6,7 +6,7 @@ var height;
 var page_x;
 var page_y;
 
-var is_drowing = false;
+var is_drawing = false;
 
 var canvas;
 
@@ -55,8 +55,8 @@ function createTags(link_tags){
             $('#link-tag-' + json_tag['pk']).css({
                 'width': $('.video').first().width() * (json_tag["fields"]["width"] / 100) + 'px',
                 'height': $('.video').first().height() * (json_tag["fields"]["height"] / 100) + 'px',
-                'top': $('.video').first().height() * (json_tag["fields"]["x_coordinate"] / 100) + 'px',
-                'left': $('.video').first().width() * (json_tag["fields"]["y_coordinate"] / 100) + 'px',
+                'top': $('.video').first().height() * (json_tag["fields"]["y_coordinate"] / 100) + 'px',
+                'left': $('.video').first().width() * (json_tag["fields"]["x_coordinate"] / 100) + 'px',
             })
         });
     });
@@ -74,8 +74,8 @@ function createLinkTagArea(element){
                 document.getElementById('canvas').remove();
                 $(this).parent().parent().parent().find('input[name="width"]').remove();
                 $(this).parent().parent().parent().find('input[name="height"]').remove();
-                $(this).parent().parent().parent().find('input[name="x_coordinate"]').remove();
                 $(this).parent().parent().parent().find('input[name="y_coordinate"]').remove();
+                $(this).parent().parent().parent().find('input[name="x_coordinate"]').remove();
             };
         }
         // 既存タグ変更時
@@ -83,12 +83,12 @@ function createLinkTagArea(element){
             $('#link-tag-' + getElementId(element)).remove();
             $(this).parent().parent().parent().find('input[name="width"]').remove();
             $(this).parent().parent().parent().find('input[name="height"]').remove();
-            $(this).parent().parent().parent().find('input[name="x_coordinate"]').remove();
             $(this).parent().parent().parent().find('input[name="y_coordinate"]').remove();
+            $(this).parent().parent().parent().find('input[name="x_coordinate"]').remove();
         }
 
         $('.video').first().one('mousedown', function(e) {
-            is_drowing = true;
+            is_drawing = true;
     
             start_x = e.offsetX;
             start_y = e.offsetY;
@@ -111,14 +111,14 @@ function createLinkTagArea(element){
 
         $('.video').first().on('mousemove', function(e) {
             e.stopPropagation();
-            if(is_drowing){
+            if(is_drawing){
                 canvas.style.width = (e.offsetX - start_x) + 'px';
                 canvas.style.height = (e.offsetY - start_y) + 'px';
             }
         });
 
         $('.video').first().one('mouseup', function(e) {
-            is_drowing = false;
+            is_drawing = false;
             
             end_x = e.offsetX;
             end_y = e.offsetY;
@@ -143,22 +143,32 @@ function createLinkTagArea(element){
             height.value = Math.floor(height_value * 100) / 100;
     
             var top = document.createElement("input")
-            top.id = top.name = 'x_coordinate';
+            top.id = top.name = 'y_coordinate';
             top.type = "hidden";
-            var top_value = (start_y / $('.video').first().height()) * 100;
-            top.value = Math.floor(top_value * 100) / 100;
     
             var left = document.createElement("input");
-            left.id = left.name = 'y_coordinate';
+            left.id = left.name = 'x_coordinate';
             left.type = "hidden";
-            var left_value = (start_x / $('.video').first().width()) * 100;
-            left.value = Math.floor(left_value * 100) / 100;
+
+            var main_video_id = $('#video-field').children('.video').attr('id');
+            
+            if(three_dim_flags[main_video_id] == 'True'){
+                // 定位置を0とする 実際に見えているのは -37.5° ~ 37.5°
+                var top_value = (phi * 180 / Math.PI) + (75 * (start_y / $('.video').first().height()));
+                top.value = Math.floor(top_value * 100) / 100;
+                var left_value = ((theta % (Math.PI * 2)) * 180 / Math.PI) + (37.5 * ((start_x / $('.video').first().width()) - 0.5));
+                left.value = Math.floor(left_value * 100) / 100;
+            }
+            else
+            {
+                var top_value = (start_y / $('.video').first().height()) * 100;
+                top.value = Math.floor(top_value * 100) / 100;
+                var left_value = (start_x / $('.video').first().width()) * 100;
+                left.value = Math.floor(left_value * 100) / 100;
+            }
 
             if(element.attr('id') == 'add-tag-area-btn'){
-                $('#input_wrap').append(width);
-                $('#input_wrap').append(height);
-                $('#input_wrap').append(top);
-                $('#input_wrap').append(left);
+                $('#input_wrap').append(width, height, top, left);
             }
             else{
                 $('#tag-per-form-' + getElementId(element)).append(width);
@@ -189,10 +199,24 @@ function createLinkTag(link_tag) {
     tag.style.position = "absolute";
     tag.style.backgroundColor = "rgba(120,120,120,0.5)";
     tag.style.display = "block";
-    tag.style.left = $('.video').first().width() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
-    tag.style.top = $('.video').first().height() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+    if(three_dim_flags[$('.video').first().attr('id')] == 'True'){
+        tag.style.left = ($('.video').first().width() / 2) + (500 * THREE.Math.degToRad(link_tag["fields"]['x_coordinate'])) + 'px';
+        tag.style.top = 500 * THREE.Math.degToRad(link_tag["fields"]['y_coordinate']) * -1 + 'px';
+    }
+    else
+    {
+        tag.style.left = $('.video').first().width() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+        tag.style.top = $('.video').first().height() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
+    }
     tag.style.width = $('.video').first().width() * (link_tag["fields"]['width'] / 100) + 'px';
     tag.style.height = $('.video').first().height() * (link_tag["fields"]['height'] / 100) + 'px';
+
+    tag.addEventListener('click', () => {
+        videos.forEach(video => {
+            video.pause(); 
+        });
+        switchPlayFlg();
+    });
 
     return tag;
 }
@@ -208,8 +232,15 @@ function createPopupTag(link_tag) {
     tag.style.position = "absolute";
     tag.style.backgroundColor = "rgba(120,120,120,0.5)";
     tag.style.display = "block";
-    tag.style.left = $('.video').first().width() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
-    tag.style.top = $('.video').first().height() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+    if(three_dim_flags[$('.video').first().attr('id')] == 'True'){
+        tag.style.left = ($('.video').first().width() / 2) + (500 * THREE.Math.degToRad(link_tag["fields"]['x_coordinate'])) + 'px';
+        tag.style.top = 500 * THREE.Math.degToRad(link_tag["fields"]['y_coordinate']) + 'px';
+    }
+    else
+    {
+        tag.style.left = $('.video').first().width() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+        tag.style.top = $('.video').first().height() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
+    }
     tag.style.width = $('.video').first().width() * (link_tag["fields"]['width'] / 100) + 'px';
     tag.style.height = $('.video').first().height() * (link_tag["fields"]['height'] / 100) + 'px';
 
@@ -273,8 +304,15 @@ function createStoryTag(link_tag){
     tag.style.position = "absolute";
     tag.style.backgroundColor = "rgba(120,120,120,0.5)";
     tag.style.display = "block";
-    tag.style.left = $('.video').first().width() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
-    tag.style.top = $('.video').first().height() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+    if(three_dim_flags[$('.video').first().attr('id')] == 'True'){
+        tag.style.left = ($('.video').first().width() / 2) + (500 * THREE.Math.degToRad(link_tag["fields"]['x_coordinate'])) + 'px';
+        tag.style.top = 500 * THREE.Math.degToRad(link_tag["fields"]['y_coordinate']) + 'px';
+    }
+    else
+    {
+        tag.style.left = $('.video').first().width() * (link_tag["fields"]['x_coordinate'] / 100) + 'px';
+        tag.style.top = $('.video').first().height() * (link_tag["fields"]['y_coordinate'] / 100) + 'px';
+    }
     tag.style.width = $('.video').first().width() * (link_tag["fields"]['width'] / 100) + 'px';
     tag.style.height = $('.video').first().height() * (link_tag["fields"]['height'] / 100) + 'px';
 
@@ -308,15 +346,15 @@ function createHiddenField(form, link_tag){
     form.append(height);
 
     var top = document.createElement("input")
-    top.name = 'x_coordinate';
+    top.name = 'y_coordinate';
     top.type = "hidden";
-    top.value = link_tag["fields"]["x_coordinate"];
+    top.value = link_tag["fields"]["y_coordinate"];
     form.append(top);
 
     var left = document.createElement("input");
-    left.name = 'y_coordinate';
+    left.name = 'x_coordinate';
     left.type = "hidden";
-    left.value = link_tag["fields"]["y_coordinate"];
+    left.value = link_tag["fields"]["x_coordinate"];
     form.append(left);
 }
 
@@ -395,9 +433,14 @@ function changeActionTypeEvent(form) {
     });
 };
 
+// サイドメニュータグごとタイトル押下時イベント関数
 function createSideTagEvent(link_tag){
-    // サイドメニュータグごとタグタイトル押下時
+    // サイドメニュータグごとタイトル押下時
     $('#tag-per-btn-' + link_tag['pk']).on('click', function(e) {
+        if($('.video').first().attr('id') != link_tag['fields']['video'])
+        {
+            changeMainVideo(document.getElementById(link_tag['fields']['video']));
+        }
         // formアニメーション設定
         tag_form_id = '#' + $('#tag-per-btn-' + link_tag['pk']).attr('id').replace('tag-per-btn', 'tag-per-form');
         $(tag_form_id).stop(true).animate({'height': 'toggle'});
@@ -612,14 +655,12 @@ function setPopupBtnEventFromGeneral(){
     }
     $('.popup-btn-field').off('click');
     $('.popup-btn-field').on("click", function () {
-        console.log($('#popup-btn-url-general').val());
         window.open($('#popup-btn-url-general').val(), '_blank');
     });
 }
 
 // タグ編集時ポップアップボタンクリックイベント
 function setPopupBtnEventFromLinkTag(link_tag, element){
-    console.log($('#popup-btn-text-' + link_tag['pk']).val());
     if($('#popup-btn-text-' + link_tag['pk']).val() != ''
         || link_tag['fields']['popup_text'] != ''){
             $('.popup-btn-field').css('display', 'block');
@@ -638,7 +679,6 @@ function setPopupBtnEventFromLinkTag(link_tag, element){
         }
         else
         {
-            console.log('hogehoge');
             window.open($(element.parent().find('input[name="popup_btn_url"]')).val(), '_blank');
         }
     });
@@ -648,52 +688,71 @@ function setPopupBtnEventFromLinkTag(link_tag, element){
 function videoClickEvent(){
     $('#video-field').children('.video').prop('muted', false);
     $('.video-flex-box').children('.video').on("click", function () {
-        var main_video_id = $('#video-field').children('.video').attr('id');
-        // クリックされた動画が360度動画ならマウスドラッグイベント付与
-        var video_width = $(this).width();
-        var video_height = $(this).height();
-        if(three_dim_flgs[$(this).attr('id')] == 'True'){
-            this.addEventListener(
-                EVENT.TOUCH_START,
-                three_dim_info[$(this).attr('id')]["mousedownevent"] = onDocumentMouseDown.bind(this, three_dim_info[$(this).attr('id')]["camera"]),
-                false );
-            
-            // 動画のサイズ、アスペクト比変更
-            var camera = three_dim_info[$(this).attr('id')]["camera"];
-            var renderer = three_dim_info[$(this).attr('id')]["renderer"];
-            // 動画のサイズ、アスペクト比変更
-            camera.aspect = $(`#${main_video_id}`).width() / $(`#${main_video_id}`).height();
-            camera.updateProjectionMatrix();
-            renderer.setSize( $(`#${main_video_id}`).width(), $(`#${main_video_id}`).height() );
+        changeMainVideo(this);
+    });
+}
+
+// メインvideo切り替え関数
+function changeMainVideo(element){
+    var main_video_id = $('#video-field').children('.video').attr('id');
+    // クリックされた動画が360度動画ならマウスドラッグイベント付与
+    var video_width = $(element).width();
+    var video_height = $(element).height();
+    if(three_dim_flags[$(element).attr('id')] == 'True'){
+        // 変数初期化
+        onMouseDownMouseX = 0, onMouseDownMouseY = 0,
+        lon = 0, onMouseDownLon = 0,
+        lat = 0, onMouseDownLat = 0,
+        phi = 0, theta = 0;
+        console.log(element)
+        
+        element.addEventListener(
+            EVENT.TOUCH_START,
+            three_dim_info[$(element).attr('id')]["mousedownevent"] = onDocumentMouseDown.bind(element, three_dim_info[$(element).attr('id')]["camera"], tag_tops, tag_lefts),
+            false );
+        
+        // 動画のサイズ、アスペクト比変更
+        var camera = three_dim_info[$(element).attr('id')]["camera"];
+        var renderer = three_dim_info[$(element).attr('id')]["renderer"];
+        // 動画のサイズ、アスペクト比変更
+        camera.aspect = $(`#${main_video_id}`).width() / $(`#${main_video_id}`).height();
+        camera.updateProjectionMatrix();
+        renderer.setSize( $(`#${main_video_id}`).width(), $(`#${main_video_id}`).height() );
+    }
+    // メインの動画が360度動画か
+    if(three_dim_flags[main_video_id] == 'True'){
+        // マウスドラッグイベント削除
+        document.getElementById(main_video_id).removeEventListener(
+            EVENT.TOUCH_START,
+            three_dim_info[main_video_id]["mousedownevent"],
+            false );
+        // カメラのポジションを初期値に設定
+        var camera = three_dim_info[main_video_id]["camera"];
+        var renderer = three_dim_info[main_video_id]["renderer"];
+        var scene = three_dim_info[main_video_id]["scene"];
+        phi = THREE.Math.degToRad( 90 - 0 );
+        theta = THREE.Math.degToRad( 0 );
+        camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
+        camera.position.y = 100 * Math.cos( phi );
+        camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
+        camera.lookAt( 0, 0, 0 );
+        renderer.render( scene, camera );
+        // 動画のサイズ、アスペクト比変更
+        camera.aspect = video_width / video_height;
+        camera.updateProjectionMatrix();
+        renderer.setSize( video_width, video_height );
+    }
+    $('#video-field').children('.video').prop('muted', true);
+    $(element).before($('#video-field').children('.video'));
+    $('#video-field').prepend($(element));
+    $(element).off();
+    $('input[name="video"]').val($(element).attr('id'));
+    videoClickEvent();
+    // 別ビデオに紐づくタグを非表示にする
+    obj_link_tags.forEach(function(tag, index){
+        if($('.video').first().attr('id') != tag["fields"]["video"]) {
+                tag_elements[index].style.visibility = "hidden";
         }
-        // メインの動画が360度動画か
-        if(three_dim_flgs[main_video_id] == 'True'){
-            // マウスドラッグイベント削除
-            document.getElementById(main_video_id).removeEventListener(
-                EVENT.TOUCH_START,
-                three_dim_info[main_video_id]["mousedownevent"],
-                false );
-            // カメラのポジションを初期値に設定
-            var camera = three_dim_info[main_video_id]["camera"];
-            var renderer = three_dim_info[main_video_id]["renderer"];
-            var scene = three_dim_info[main_video_id]["scene"];
-            phi = THREE.Math.degToRad( 90 - 0 );
-            theta = THREE.Math.degToRad( 0 );
-            camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
-            camera.position.y = 100 * Math.cos( phi );
-            camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
-            camera.lookAt( 0, 0, 0 );
-            renderer.render( scene, camera );
-            // 動画のサイズ、アスペクト比変更
-            camera.aspect = video_width / video_height;
-            camera.updateProjectionMatrix();
-            renderer.setSize( video_width, video_height );
-        }
-        $('#video-field').children('.video').prop('muted', true);
-        $(this).before($('#video-field').children('.video'));
-        $('#video-field').prepend($(this));
-        $(this).off();
-        videoClickEvent();
     });
 }
 

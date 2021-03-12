@@ -783,9 +783,14 @@ function createUserAnalysisTable(){
             analysis.actionAnalysis.forEach(function(action, index){
                 var action_wrap = $('<div class="action-row"></div>');
                 var index_ele = $(`<div></div>`);
-                var action_type =$(`<div>${action.action_type}</div>`);
-                var action_name =$(`<div>${(action.tag != null) ? action.tag.title : action.switch_video.id}</div>`);
-                var action_time =$(`<div>${action.action_time}</div>`);
+                var action_type = $(`<div>${action.action_type}</div>`);
+                var name = (action.action_type == "story_back")
+                    ? ""
+                    : (action.action_type == "switch")
+                        ? action.switch_video.id
+                        : action.tag.title;
+                var action_name = $(`<div>${name}</div>`);
+                var action_time = $(`<div>${action.action_time}</div>`);
                 action_wrap.append(index_ele, action_type, action_name, action_time);
                 action_box.append(action_wrap);
             });

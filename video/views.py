@@ -1,24 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.views import generic
 from django.views.generic import CreateView, UpdateView
 from .models import VideoRelation, Video, LinkTag, EndTag
 from .forms import VideoRelationForm, VideoForm, LinkTagForm, EndTagForm
 from project.models import Project
-from django.db import models
 from django.urls import reverse_lazy
-from config import settings
 from django.core import serializers
-from django.core.files.storage import default_storage, FileSystemStorage
 from django.db.models import Q
 
-import ffmpeg
-import subprocess
 import cv2
 import os.path
 import json
 import shutil
-import glob
+
 
 class VideoCreateView(CreateView, generic.edit.ModelFormMixin):
     template_name = 'video/video_list.html'
@@ -37,13 +32,13 @@ class VideoCreateView(CreateView, generic.edit.ModelFormMixin):
                 video_relation_form.instance.project_id = self.kwargs['pk']
                 video_relation_form.save()
                 videos = request.FILES.getlist('video')
-                three_dimensional_flgs = request.POST.getlist('three_dimensional_flg')
+                three_dimensional_flags = request.POST.getlist('three_dimensional_flg')
                 firstFlg = True
                 for index, video in enumerate(videos):
                     video_add_form = VideoForm(** self.get_form_kwargs())
                     video_add_form.instance.video = video
                     video_add_form.instance.video_relation_id = video_relation_form.instance.id
-                    video_add_form.instance.three_dimensional_flg = False if(three_dimensional_flgs[index] == '0') else True
+                    video_add_form.instance.three_dimensional_flg = False if(three_dimensional_flags[index] == '0') else True
                     video_add_form.save()
                     if firstFlg:
                         make_video_thumb(
@@ -52,12 +47,13 @@ class VideoCreateView(CreateView, generic.edit.ModelFormMixin):
                             video_add_form.instance.video_relation_id,
                         )
                         firstFlg = False
-                
+
         self.object = VideoRelation.objects.filter(project_id=self.kwargs['pk'])
         return self.form_invalid(video_relation_form)
 
     def get_success_url(self):
-        return reverse_lazy('video:video_list', kwargs={'pk':self.kwargs['pk']})
+        return reverse_lazy('video:video_list', kwargs={'pk': self.kwargs['pk']})
+
 
 class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
     template_name = 'video/video_detail.html'
@@ -66,17 +62,20 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
 
     def get_context_data(self, **kwargs):
         kwargs['videos'] = Video.objects.filter(video_relation_id=self.kwargs['pk'])
-        kwargs['link_tags'] = LinkTag.objects.filter(video_id=kwargs['videos'][0].id)
+        kwargs['link_tags'] = LinkTag.objects.filter(video__video_relation_id=self.kwargs['pk'])
         kwargs['relation'] = VideoRelation.objects.get(id=self.kwargs['pk'])
         kwargs['project'] = Project.objects.get(id=kwargs['relation'].project.pk)
-        kwargs['next_videos'] = VideoRelation.objects.filter(Q(project_id=kwargs['relation'].project_id) & ~Q(id=kwargs['relation'].id))
-        kwargs['link_tags_json'] = serializers.serialize('json', LinkTag.objects.filter(video_id=kwargs['videos'][0].id))
-        kwargs['end_tags_json'] = serializers.serialize('json', EndTag.objects.filter(video_id=kwargs['videos'][0].id).select_related('video'))
+        kwargs['next_videos'] = VideoRelation.objects.filter(
+            Q(project_id=kwargs['relation'].project_id) & ~Q(id=kwargs['relation'].id))
+        kwargs['link_tags_json'] = serializers.serialize(
+            'json', LinkTag.objects.filter(video__video_relation_id=self.kwargs['pk']))
+        kwargs['end_tags_json'] = serializers.serialize('json', EndTag.objects.filter(
+            video_id=kwargs['videos'][0].id).select_related('video'))
         LinkTag.video_relation = kwargs['relation'].title
         return super(VideoDetailTemplateView, self).get_context_data(**kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('video:video_detail', kwargs={'pk':self.kwargs['pk']})
+        return reverse_lazy('video:video_detail', kwargs={'pk': self.kwargs['pk']})
 
     def post(self, request, *args, **kwargs):
         # link-tag追加処理
@@ -84,6 +83,9 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
             link_tag_form = LinkTagForm(**self.get_form_kwargs())
             if link_tag_form.is_valid():
                 link_tag_form.save()
+
+            else:
+                print(link_tag_form.errors)
 
             self.object = self.get_object()
             return self.form_invalid(link_tag_form)
@@ -99,7 +101,7 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
                 target_tag.story_next_video = link_tag_form.cleaned_data['story_next_video']
                 target_tag.story_start_flame = link_tag_form.cleaned_data['story_start_flame']
                 target_tag.popup_type = link_tag_form.cleaned_data['popup_type']
-                if link_tag_form.cleaned_data['popup_img'] != None:
+                if link_tag_form.cleaned_data['popup_img'] is None:
                     target_tag.popup_img = link_tag_form.cleaned_data['popup_img']
                 target_tag.popup_text = link_tag_form.cleaned_data['popup_text']
                 target_tag.x_coordinate = link_tag_form.cleaned_data['x_coordinate']
@@ -118,8 +120,8 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
             end_tag_form = EndTagForm(**self.get_form_kwargs())
             if end_tag_form.is_valid():
                 EndTag.objects.update_or_create(
-                    video = end_tag_form.instance.video,
-                    defaults = {
+                    video=end_tag_form.instance.video,
+                    defaults={
                         "title": end_tag_form.instance.title,
                         "content": end_tag_form.instance.content,
                     },
@@ -129,6 +131,8 @@ class VideoDetailTemplateView(UpdateView, generic.edit.ModelFormMixin):
             return self.form_invalid(end_tag_form)
 
 # サムネ作成
+
+
 def make_video_thumb(filepath, projectId, videoRelationId):
     up_path = 'static/videos/{0}/{1}/thumb/'.format(projectId, videoRelationId)
 
@@ -143,10 +147,11 @@ def make_video_thumb(filepath, projectId, videoRelationId):
         cap_file.release()
 
 # プロジェクト編集
+
+
 def editVideo(request):
     if request.method == 'GET':
         videoRelation = VideoRelation.objects.get(id=request.GET['id'])
-        video_title = videoRelation.title
         # タイトル変更時
         if 'title' in request.GET:
             videoRelation.title = request.GET['title']
@@ -156,6 +161,8 @@ def editVideo(request):
         return HttpResponse("NG")
 
 # ビデオ削除
+
+
 def deleteVideo(request, pk):
     if request.method == 'GET':
         video = VideoRelation.objects.get(id=pk)
@@ -165,14 +172,18 @@ def deleteVideo(request, pk):
         return redirect('video:video_list', pk=video.project_id)
 
 # ストーリー先ビデオ情報取得
+
+
 def getNextVideo(request):
     if request.method == 'GET':
         if 'next_video' in request.GET:
             next_video_id = request.GET['next_video']
             # 値をJSON形式で作成
-            video = Video.objects.filter(video_relation_id=next_video_id).select_related('video_relation')
+            video = Video.objects.filter(
+                video_relation_id=next_video_id).select_related('video_relation')
             link_tag = serializers.serialize('json', LinkTag.objects.filter(video_id=video[0].pk))
-            end_tag = serializers.serialize('json', EndTag.objects.filter(video_id=video[0].pk).select_related('video'))
+            end_tag = serializers.serialize('json', EndTag.objects.filter(
+                video_id=video[0].pk).select_related('video'))
             video_all = [{
                 'video': serializers.serialize('json', video),
                 'link_tag': link_tag,
@@ -183,9 +194,10 @@ def getNextVideo(request):
         return HttpResponse("NG")
 
 # tag削除
+
+
 def deleteTag(request, pk, relationId):
     if request.method == 'GET':
         tag = LinkTag.objects.filter(id=pk)
         tag.delete()
         return redirect('video:video_detail', pk=relationId)
-    

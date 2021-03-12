@@ -41,7 +41,6 @@ function dateFormat(date){
 }
 
 // -----------------------------------------------------------------------------------------
-
 // 動画サイズ変更
 $(document).ready(function () {
     hsize = $(window).height();
@@ -54,10 +53,20 @@ $(window).resize(function () {
 
 var fps = 30;
 
+var three_dim_info = {};
+
 // video読み込み後
-$('.main-video-box').children('.video').on('loadedmetadata', function(){
+$('.video').first().on('loadedmetadata', function(){
+    $.each($('.video'), function(index, x){
+        if(three_dim_flgs[x.id]){
+            var [camera, renderer, scene, mouseDownEvent, video] =  createThreeDimVideo(x, index);
+            // Videoに紐づく3D情報、ビデオ要素格納
+            three_dim_info[x.id] = {"camera": camera, "renderer": renderer, "scene": scene, "mousedownevent": mouseDownEvent, "video": video};
+        }
+    });
     $('#time-duration').text(timeFormat($(this)[0].duration));
     $('#frame-total').text(Math.ceil($(this)[0].duration * fps));
+    videoClickEvent();
     // var vid = document.getElementById("main-video");
     // vid.playbackRate = 2.0;
 });
@@ -87,14 +96,27 @@ $('#video-btn').on('click', function(e) {
     }
     switchPlayFlg();
 });
-
 function videoFrameEvent(){
     videoFrameInterval = setInterval(function(){
-        $('#frame-now').text(Math.ceil($('#main-video')[0].currentTime * fps));
-        // 現在の再生場所変更
-        $('#seekbar-now').css('left', ($('#main-video')[0].currentTime / $('#main-video')[0].duration) * 100 + "%");
+        if(three_dim_flgs[$('.video').first().attr('id')]){
+            $('#frame-now').text(Math.ceil(three_dim_info[$('.video').first().attr('id')]["video"].currentTime * fps));
+            // 現在の再生場所変更
+            $('#seekbar-now').css('left', (three_dim_info[$('.video').first().attr('id')]["video"].currentTime / $('.video').first().duration) * 100 + "%");
 
-        $("#time-current").text(timeFormat($('#main-video')[0].currentTime));
+            $("#time-current").text(timeFormat(three_dim_info[$('.video').first().attr('id')]["video"].currentTime));
+
+            setEndTime(three_dim_info[$('.video').first().attr('id')]["video"].currentTime);
+        }
+        else
+        {
+            $('#frame-now').text(Math.ceil($('.video').first().get(0).currentTime * fps));
+            // 現在の再生場所変更
+            $('#seekbar-now').css('left', ($('.video').first().get(0).currentTime / $('.video').first().get(0).duration) * 100 + "%");
+
+            $("#time-current").text(timeFormat($('.video').first().get(0).currentTime));
+
+            setEndTime($('.video').first().get(0).currentTime);
+        }
 
         // タグ作成
         JSON.parse(json_tags).forEach(json_tag => {
@@ -111,17 +133,10 @@ function videoFrameEvent(){
     }, fps);
 }
 
-// 現在の再生時間取得
-$('#main-video').on('timeupdate', function(event) {
-    $("#time-current").text(timeFormat($('#main-video')[0].currentTime));
-    setEndTime();
-});
-
 // 動画終了時イベント
 videoEndedEvent()
 function videoEndedEvent(){
-    $(".video-flex-box").children('.video').off("ended");
-    $('#main-video').on('ended', function() {
+    $('.video').first().on('ended', function() {
         switchPlayFlg();
 
         // 終了タグ作成
@@ -140,7 +155,13 @@ function switchPlayFlg(){
     if(is_playing) {
         is_playing = false;
         $('.video').each(function(index, element){
-            element.pause();
+            if(three_dim_flgs[$(element).attr("id")]){
+                three_dim_info[$(element).attr("id")]["video"].pause();
+            }
+            else
+            {
+                element.pause();
+            }
         });
         path = path.replace('stop_btn.png', 'play_btn.png');
         clearInterval(videoFrameInterval);
@@ -148,7 +169,13 @@ function switchPlayFlg(){
     else {
         is_playing = true;
         $('.video').each(function(index, element){
-            element.play();
+            if(three_dim_flgs[$(element).attr("id")]){
+                three_dim_info[$(element).attr("id")]["video"].play();
+            }
+            else
+            {
+                element.play();
+            }
         });
         path = path.replace('play_btn.png', 'stop_btn.png');
         videoFrameEvent();
@@ -159,11 +186,27 @@ function switchPlayFlg(){
 // seekbarドラッグ時イベント
 $('.seekbar').on('mousedown', function(e) {
     $('#seekbar-now').css('left', (e.offsetX / $('.seekbar').width()) * 100 + '%');
-    $('#main-video')[0].currentTime = $('#main-video')[0].duration * (e.offsetX / $('.seekbar').width());
+    $('.video').each(function(index, element){
+        if(three_dim_flgs[$(element).attr("id")]){
+            three_dim_info[$(element).attr("id")]["video"].currentTime = three_dim_info[$(element).attr("id")]["video"].duration * (e.offsetX / $('.seekbar').width());
+        }
+        else
+        {
+            element.currentTime = element.duration * (e.offsetX / $('.seekbar').width());
+        }
+    });
 
     $('.seekbar').on('mousemove', function(e) {
         $('#seekbar-now').css('left', (e.offsetX / $('.seekbar').width()) * 100 + '%');
-        $('#main-video')[0].currentTime = $('#main-video')[0].duration * (e.offsetX / $('.seekbar').width());
+        $('.video').each(function(index, element){
+            if(three_dim_flgs[$(element).attr("id")]){
+                three_dim_info[$(element).attr("id")]["video"].currentTime = three_dim_info[$(element).attr("id")]["video"].duration * (e.offsetX / $('.seekbar').width());
+            }
+            else
+            {
+                element.currentTime = element.duration * (e.offsetX / $('.seekbar').width());
+            }
+        });
     });
 
     $('.seekbar').on('mouseup', function(e) {
@@ -172,34 +215,87 @@ $('.seekbar').on('mousedown', function(e) {
     });
 });
 
-// サブビデオクリックイベント
-videoClickEvent();
-
+// サブ動画クリック時のイベント
 function videoClickEvent(){
     $('.video-flex-box').children('.video').on("click", function () {
+        main_video_id = $('.video').first().attr("id");
         // Ajax通信を開始する
-        splitUrl = $(this).children('source').attr('src').split('/');
+        var action_time = (three_dim_flgs[main_video_id])
+            ? three_dim_info[main_video_id]["video"].currentTime
+            : $('.video').first().get(0).currentTime;
         data = {
-            "action_time": $('#main-video')[0].currentTime,
+            "action_time": action_time,
             "user_analysis_id": user_analysis_id,
             "action_type": "switch",
-            "switch_video_id": splitUrl[splitUrl.length - 1].split('.')[0],
+            "switch_video_id": $(this).attr('id'),
         };
         ajaxRequest(set_action_analysis, data).done(function(result){
             console.log(result);
         }).fail(function(result){
             console.log(result);
         });
-        $(this)[0].muted = false;
-        $('#main-video')[0].muted = true;
-        $(this).before($('#main-video'));
+        // 動画の大きさ変更のため、クリックされた動画の大きさ保持しておく
+        var video_width = $(this).width();
+        var video_height = $(this).height();
+        // クリックされた動画の処理
+        if(three_dim_flgs[$(this).attr("id")]){
+            three_dim_info[$(this).attr("id")]["video"].muted = false;
+            // 動画の時間を切り替える
+            $('#time-duration').text(timeFormat(three_dim_info[$(this).attr("id")]["video"].duration));
+            $('#frame-total').text(Math.ceil(three_dim_info[$(this).attr("id")]["video"].duration * fps));
+            this.addEventListener(
+                EVENT.TOUCH_START,
+                three_dim_info[$(this).attr('id')]["mousedownevent"] = onDocumentMouseDown.bind(this, three_dim_info[$(this).attr('id')]["camera"]),
+                false );
+            
+            // 動画のサイズ、アスペクト比変更
+            var camera = three_dim_info[$(this).attr('id')]["camera"];
+            var renderer = three_dim_info[$(this).attr('id')]["renderer"];
+            // 動画のサイズ、アスペクト比変更
+            camera.aspect = $(`#${main_video_id}`).width() / $(`#${main_video_id}`).height();
+            camera.updateProjectionMatrix();
+            renderer.setSize( $(`#${main_video_id}`).width(), $(`#${main_video_id}`).height() );
+        }
+        else
+        {
+            $(this)[0].muted = false;
+            // 動画の時間を切り替える
+            $('#time-duration').text(timeFormat($(this)[0].duration));
+            $('#frame-total').text(Math.ceil($(this)[0].duration * fps));
+        }
+        // メインで再生している動画の処理
+        if(three_dim_flgs[main_video_id]){
+            // マウスドラッグイベント削除
+            document.getElementById(main_video_id).removeEventListener(
+                EVENT.TOUCH_START,
+                three_dim_info[main_video_id]["mousedownevent"],
+                false );
+            three_dim_info[main_video_id]["video"].muted = true;
+            $(three_dim_info[main_video_id]["video"]).off("ended");
+            // カメラのポジションを初期値に設定
+            var camera = three_dim_info[main_video_id]["camera"];
+            var renderer = three_dim_info[main_video_id]["renderer"];
+            var scene = three_dim_info[main_video_id]["scene"];
+            phi = THREE.Math.degToRad( 90 - 0 );
+            theta = THREE.Math.degToRad( 0 );
+            camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
+            camera.position.y = 100 * Math.cos( phi );
+            camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
+            camera.lookAt( 0, 0, 0 );
+            renderer.render( scene, camera );
+            // 動画のサイズ、アスペクト比変更
+            camera.aspect = video_width / video_height;
+            camera.updateProjectionMatrix();
+            renderer.setSize( video_width, video_height );
+        }
+        else
+        {
+            $('.video').first().get(0).muted = true;
+            $('.video').first().off("ended");
+        }
+        $(this).before($('.video').first());
         $('.main-video-box').prepend($(this));
-        $('#main-video').removeAttr('id');
-        $(this).attr('id', 'main-video');
         $(this).off();
-        // 動画の時間を切り替える
-        $('#time-duration').text(timeFormat($(this)[0].duration));
-        $('#frame-total').text(Math.ceil($(this)[0].duration * fps));
         videoEndedEvent();
         videoClickEvent();
     });
@@ -227,17 +323,17 @@ function createTags(json_tag){
         'background-color': 'rgba(120,120,120,0.9)',
         'opacity': '0.5',
         'cursor': 'pointer',
-        width: $('#main-video').width() * (json_tag['fields']['width'] / 100) + 'px',
-        height: $('#main-video').height() * (json_tag['fields']['height'] / 100) + 'px',
-        top: $('#main-video').height() * (json_tag['fields']['x_coordinate'] / 100) + 'px',
-        left: $('#main-video').width() * (json_tag['fields']['y_coordinate'] / 100) + 'px',
+        width: $('.video').first().width() * (json_tag['fields']['width'] / 100) + 'px',
+        height: $('.video').first().height() * (json_tag['fields']['height'] / 100) + 'px',
+        top: $('.video').first().height() * (json_tag['fields']['y_coordinate'] / 100) + 'px',
+        left: $('.video').first().width() * (json_tag['fields']['x_coordinate'] / 100) + 'px',
     });
     $(window).resize(function() {
         tag.css({
             'width': $('.video').first().width() * (json_tag["fields"]["width"] / 100) + 'px',
             'height': $('.video').first().height() * (json_tag["fields"]["height"] / 100) + 'px',
-            'top': $('.video').first().height() * (json_tag["fields"]["x_coordinate"] / 100) + 'px',
-            'left': $('.video').first().width() * (json_tag["fields"]["y_coordinate"] / 100) + 'px',
+            'top': $('.video').first().height() * (json_tag["fields"]["y_coordinate"] / 100) + 'px',
+            'left': $('.video').first().width() * (json_tag["fields"]["x_coordinate"] / 100) + 'px',
         });
     });
     $('.main-video-box').append(tag);
@@ -252,9 +348,12 @@ function createLinkTag(link_tag){
                 if(is_playing){
                     switchPlayFlg();
                 }
+                var action_time = (three_dim_flgs[$('.video').first().attr("id")])
+                    ? three_dim_info[$('.video').first().attr("id")]["video"].currentTime
+                    : $('.video').first().get(0).currentTime;
                 // Ajax通信を開始する
                 data = {
-                    "action_time": $('#main-video')[0].currentTime,
+                    "action_time": action_time,
                     "user_analysis_id": user_analysis_id,
                     "tag_id": link_tag['pk'],
                     "action_type": "link",
@@ -277,8 +376,11 @@ function createPopupTag(link_tag){
         on: {
             click: function(event){
                 // Ajax通信を開始する
+                var action_time = (three_dim_flgs[$('.video').first().attr("id")])
+                    ? three_dim_info[$('.video').first().attr("id")]["video"].currentTime
+                    : $('.video').first().get(0).currentTime;
                 data = {
-                    "action_time": $('#main-video')[0].currentTime,
+                    "action_time": action_time,
                     "user_analysis_id": user_analysis_id,
                     "tag_id": link_tag['pk'],
                     "action_type": "popup",
@@ -371,11 +473,20 @@ function createStoryTag(link_tag){
                 is_story_flg = true;
 
                 // 前のVideoに戻れるよう情報を保持しておく
-                before_video_times.push($('#main-video')[0].currentTime);
+                if(three_dim_flgs[$('.video').first().attr("id")]){
+                    before_video_times.push(three_dim_info[$('.video').first().attr("id")]["video"].currentTime);
+                }
+                else
+                {
+                    before_video_times.push($('.video').first().get(0).currentTime);
+                }
 
                 // Ajax通信を開始する
+                var action_time = (three_dim_flgs[$('.video').first().attr("id")])
+                    ? three_dim_info[$('.video').first().attr("id")]["video"].currentTime
+                    : $('.video').first().get(0).currentTime;
                 data = {
-                    "action_time": $('#main-video')[0].currentTime,
+                    "action_time": action_time,
                     "user_analysis_id": user_analysis_id,
                     "tag_id": link_tag['pk'],
                     "action_type": "story",
@@ -388,7 +499,10 @@ function createStoryTag(link_tag){
 
                 createVideoForStory(
                     link_tag['fields']["story_next_video"],
-                    $('#main-video')[0].duration * (link_tag['fields']['story_start_flame'] / ($('#main-video')[0].duration * fps)));
+                    (three_dim_flgs[$('.video').first().attr("id")])
+                        ? three_dim_info[$('.video').first().attr("id")]["video"].duration * (link_tag['fields']['story_start_flame'] / (three_dim_info[$('.video').first().attr("id")]["video"].duration * fps))
+                        : $('.video').first().get(0).duration * (link_tag['fields']['story_start_flame'] / ($('.video').first().get(0).duration * fps))
+                );
             }
         }
     });
@@ -406,9 +520,12 @@ $('#story-back-btn').on('click', function(e) {
     }).fail(function(result){
         console.log(result);
     });
-    // 戻るボタン押下アクション保存
+    // 戻るボタン押下アクション保存]
+    var action_time = (three_dim_flgs[$('.video').first().attr("id")])
+            ? three_dim_info[$('.video').first().attr("id")]["video"].currentTime
+            : $('.video').first().get(0).currentTime;
     data = {
-        "action_time": $('#main-video')[0].currentTime,
+        "action_time": action_time,
         "user_analysis_id": user_analysis_id,
         "action_type": "story_back",
     };
@@ -448,10 +565,15 @@ function createVideoForStory(video_id, start_time, before_flg = false){
 
             // ビデオ削除後データ作成しなおす
             $('.video').remove();
+            three_dim_info = {};
+            three_dim_flgs = {};
+            $('.video').off('ended');
+            clearInterval(videoFrameInterval);
             $.each(video_datas, function(index, element){
+                three_dim_flgs[element.pk] = element.fields.three_dimensional_flg;
                 if(index == 0){
                     var video = $('<video></video>', {
-                        "id": "main-video",
+                        "id": element.pk,
                         "class": "video",
                     }).append($('<source>', {
                         src: '/' + element["fields"]['video'],
@@ -461,6 +583,7 @@ function createVideoForStory(video_id, start_time, before_flg = false){
                 else{
                     $('.video-flex-box').children('video').remove();
                     var video = $('<video></video>', {
+                        "id": element.pk,
                         "class": "video"
                     }).append($('<source>', {
                         src: '/' + element["fields"]['video'],
@@ -468,23 +591,43 @@ function createVideoForStory(video_id, start_time, before_flg = false){
                     $('.video-flex-box').append(video);
                 }
             });
-            // サブビデオのクリックイベント付与
-            videoClickEvent();
             
             // 次の時間計算
             // video読み込み後
-            $('#main-video').onloadedmetadata = function(){
-                $("#time-duration").text(timeFormat($('#main-video')[0].duration));
-                $("#frame-total").text(Math.ceil($('#main-video')[0].duration * fps));
-                $('#main-video')[0].currentTime = start_time;
-            };
-            is_playing = true;
-            $('.video').each(function(index, element){
-                element.play();
+            $('.video').first().on('loadedmetadata', function(){
+                $.each($('.video'), function(index, x){
+                    if(three_dim_flgs[x.id]){
+                        var [camera, renderer, scene, mouseDownEvent, video] =  createThreeDimVideo(x, index);
+                        // Videoに紐づく3D情報、ビデオ要素格納
+                        three_dim_info[x.id] = {"camera": camera, "renderer": renderer, "scene": scene, "mousedownevent": mouseDownEvent, "video": video};
+                    }
+                });
+                if(three_dim_flgs[$(this).attr("id")]){
+                    $("#time-duration").text(timeFormat(three_dim_info[$(this).attr("id")]["video"].duration));
+                    $("#frame-total").text(Math.ceil(three_dim_info[$(this).attr("id")]["video"].duration * fps));
+                    three_dim_info[$(this).attr("id")]["video"].currentTime = start_time;
+                }
+                else
+                {
+                    $("#time-duration").text(timeFormat($(this).get(0).duration));
+                    $("#frame-total").text(Math.ceil($(this).get(0).duration * fps));
+                    $(this).get(0).currentTime = start_time;
+                }
+                is_playing = true;
+                if(three_dim_flgs[$(this).attr('id')]){
+                    $(three_dim_info[$(this).attr('id')]["video"]).get(0).play();
+                }
+                else
+                {
+                    $(this).get(0).play();
+                }
             });
             $('.video-btn').attr('src', $('.video-btn').attr('src').replace('play_btn.png', 'stop_btn.png'));
 
-            $('#main-video').on('timeupdate', function(event) {
+            // サブビデオのクリックイベント付与
+            videoClickEvent();
+
+            $('.video').on('timeupdate', function(event) {
                 setEndTime();
             });
 
@@ -513,6 +656,7 @@ function createVideoForStory(video_id, start_time, before_flg = false){
     );
 }
 
+// Ajax通信関数
 function ajaxRequest(url, data){
     // Ajax通信を開始する
     return $.ajax({
@@ -548,13 +692,13 @@ $(window).on("beforeunload", function() {
 
 
 // 動画視聴時間設定関数
-function setEndTime(){
-    if((is_story_flg == false) && (end_time < $('#main-video')[0].currentTime))
+function setEndTime(time){
+    if((is_story_flg == false) && (end_time < time))
     {
-        end_time = $('#main-video')[0].currentTime;
+        end_time = time;
     }
-    else if((is_story_flg == true) && (story_end_time < $('#main-video')[0].currentTime))
+    else if((is_story_flg == true) && (story_end_time < time))
     {
-        story_end_time = $('#main-video')[0].currentTime;
+        story_end_time = time;
     }
 }

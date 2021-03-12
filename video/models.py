@@ -61,8 +61,8 @@ class LinkTag(models.Model):
     popup_text = models.CharField(max_length=100, default='', blank=True, null=True)
     popup_btn_text = models.CharField(max_length=100, default='', blank=True, null=True)
     popup_btn_url = models.URLField(max_length=100, default='', blank=True, null=True)
-    x_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
-    y_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
+    x_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=8, default=0)
+    y_coordinate = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=8, default=0)
     width = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     height = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=5)
     display_frame = models.IntegerField(blank=False, null=False)
@@ -71,13 +71,13 @@ class LinkTag(models.Model):
 
     def filename(self):
         return os.path.basename(self.file.name)
-    
+
     def get_relation_name(self):
         return self.__video_relation
 
     def set_relation_name(self, value):
         self.__video_relation = value
-    
+
     video_relation = property(get_relation_name, set_relation_name)
 
     def __str__(self):

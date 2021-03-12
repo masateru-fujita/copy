@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mil',
+        'NAME': 'copy',
         'USER': 'root',
-        'PASSWORD': 'cladmin',
+        'PASSWORD': '!Masa6273',
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -132,7 +132,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'static'
+#STATIC_ROOT = 'static'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,
@@ -144,7 +145,7 @@ LOGIN_URL = 'main:login'
 LOGIN_REDIRECT_URL = 'main:top'
 LOGOUT_REDIRECT_URL='main:login'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["52.192.88.154", "ec2-52-192-88-154.ap-northeast-1.compute.amazonaws.com"]
 
 LOGGING = {
     'version': 1,
